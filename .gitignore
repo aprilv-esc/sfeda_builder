@@ -18,7 +18,13 @@ backend/storage/
 frontend/node_modules/
 frontend/dist/
 frontend/.angular/
+node_modules/
+node-v*/
+
+# Sample / test data
+sample_dt/
 
 # OS
 .DS_Store
 Thumbs.db
+__MACOSX/
