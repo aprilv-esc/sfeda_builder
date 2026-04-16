@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+    />
+    <title>Indications</title>
+    <!-- Favicon -->
+    <link
+      rel="shortcut icon"
+      href="images/favicon.png"
+      sizes="16x16"
+      type="image/x-icon"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+    />
+    <!-- Bootstrap, Owl Carousel and Animate.css -->
+    <link href="css/plugins.css" rel="stylesheet" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9"
+      crossorigin="anonymous"
+    />
+    <!-- Custom -->
+    <link href="css/style.css" rel="stylesheet" />
+    <link href="css/button-styles.css" rel="stylesheet" />
+    <!-- FontAwesome -->
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <!-- Responsive css -->
+    <link href="css/media.css" rel="stylesheet" />
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <a href="#" id="backButton">
+    <img
+    src="images/amlotenol/prev-btn1.png"
+      alt="Go Back"
+      class="prev-btn"
+    />
+  </a>
+  <div id="dropdown-container-pd">
+    <div
+      class="item1 product-details"
+      onclick="navigate('effectiveness-graph-by-age.html')"
+    >
+      Amlotenol Graph
+    </div>
+    <div
+      class="item2 product-details"
+      onclick="navigate('uses-and-advantages.html')"
+    >
+      Uses and Advantages
+    </div>
+    <div
+      class="item3 product-details"
+      onclick="navigate('indications.html')"
+    >
+      Indications
+    </div>
+    <div
+      class="item4 product-details"
+      onclick="navigate('side-effects.html')"
+    >
+      Side Effects
+    </div>
+  </div>
+  <div id="dropdown-container-vid">
+    <div
+      class="item1 product-details"
+      onclick="navigate('amlodipine-vid.html')"
+    >
+      Amlotenol AVP
+    </div>
+  </div>
+  <div id="dropdown-container-qna">
+    <div
+      class="item1 product-details"
+      onclick="navigate('assessments.html')"
+    >
+      Questions
+    </div>
+  </div>
+  <div class="button-nav-container">
+    <button class="button-nav" onclick="navigate('index.html')">
+      Home
+    </button>
+    <button class="button-nav viddeets">
+      Video
+      <div id="opendd-vid"><div class="caret"></div></div>
+    </button>
+    <button
+      class="button-nav productdeets"
+ 
+    >
+      Product Details
+      <div id="opendd"><div class="caret"></div></div>
+    </button>
+    <button class="button-nav qnadeets">
+      Assessments
+      <div id="opendd-qna"><div class="caret"></div></div>
+    </button>
+  </div>
+    <main>
+      <!-- Home Banner -->
+      <div class="home-banner">
+        <div id="myHomeBanner" class="carousel slide" data-ride="carousel">
+          <!-- Indicators -->
+          <!-- <ol class="carousel-indicators">
+            <li
+              data-target="#myHomeBanner"
+              data-slide-to="0"
+              class="active"
+            ></li>
+            <li data-target="#myHomeBanner" data-slide-to="1"></li>
+            <li data-target="#myHomeBanner" data-slide-to="2"></li>
+          </ol> -->
+          <!-- Wrapper for slides -->
+          <div class="carousel-inner" role="listbox">
+            <div
+              class="item active"
+              style="background-image: url('images/amlotenol/indications.gif')"
+            >
+              <div class="container">
+                <!-- <div class="d-flex justify-content-center">
+                  <img
+                    class="animate__animated animate__bounce"
+                    src="images/amlotenol/meds-title.png"
+                    width="50%"
+                    alt="text 1"
+                  />
+                </div> -->
+
+                <div class="banner-text">
+                  <!-- <img src="images/about-img-01.jpg" alt="" /> -->
+                  <!-- <h1>
+                    We Create Awesome Templates
+                    <big
+                      >Follow us on
+                      <a href="#">THEMEFOREST</a>
+                    </big>
+                  </h1>
+                  <p>Stop blending in & start leaving your mark on the web</p>
+                  <div class="button-group">
+                    <a href="#" class="btn-color">Learn More</a>
+                    <a href="#" class="btn-transparent">Buy Khamu</a>
+                  </div> -->
+                </div>
+              </div>
+            </div>
+
+            <!-- <div
+              class="item"
+              style="background-image: url('images/banner-slide-3.jpg')"
+            >
+              <div class="container">
+                <div class="banner-text">
+                  <h1>
+                    We Create Awesome Templates
+                    <big
+                      >Follow us on
+                      <a href="#">THEMEFOREST</a>
+                    </big>
+                  </h1>
+                  <p>Stop blending in & start leaving your mark on the web</p>
+                  <div class="button-group">
+                    <a href="#" class="btn-color">Learn More</a>
+                  </div>
+                </div>
+              </div>
+            </div> -->
+          </div>
+          <!-- Left and right controls -->
+          <!-- <a
+            class="left carousel-control"
+            href="#myHomeBanner"
+            role="button"
+            data-slide="prev"
+          >
+            <i class="fa fa-angle-left" aria-hidden="true"></i>
+            <span class="sr-only">Previous</span>
+          </a>
+          <a
+            class="right carousel-control"
+            href="amlodipine-vid.html"
+            role="button"
+            data-slide="next"
+          >
+            <i class="fa fa-angle-right" aria-hidden="true"></i>
+            <span class="sr-only">Next</span>
+          </a> -->
+        </div>
+      </div>
+    </main>
+    <!-- jQuery (necessary for JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAJBFXayR94GL7l9oR1IsNbt-2KtnxpRjQ"></script>
+    <script src="js/custom-google-map.js"></script>
+    <script src="js/plugins.js"></script>
+    <script src="js/custom.js"></script>
+    <script src="js/product-details.js"></script>
+    <script src="script.js"></script>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>

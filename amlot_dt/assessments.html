@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+    />
+    <title>Amlotenol</title>
+    <script
+      type="text/javascript"
+      language="javascript"
+      src="js/jquery.min.js"
+    ></script>
+    <!-- Favicon -->
+    <link
+      rel="shortcut icon"
+      href="images/favicon.png"
+      sizes="16x16"
+      type="image/x-icon"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+    />
+    <!-- Bootstrap, Owl Carousel and Animate.css -->
+    <link href="css/plugins.css" rel="stylesheet" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9"
+      crossorigin="anonymous"
+    />
+    <!-- Custom -->
+    <link href="css/style.css" rel="stylesheet" />
+    <link href="css/button-styles.css" rel="stylesheet" />
+    <!-- FontAwesome -->
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Responsive css -->
+    <link href="css/media.css" rel="stylesheet" />
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  </head>
+
+  <body id="top">
+    <main id="aspect-ratio-container">
+      <a href="#" id="backButton" >
+        <img
+        src="images/amlotenol/prev-btn1.png"
+          alt="Go Back"
+          class="prev-btn"
+        />
+      </a>
+      <div id="dropdown-container-pd">
+        <div
+          class="item1 product-details"
+          onclick="navigate('effectiveness-graph-by-age.html')"
+        >
+          Amlotenol Graph
+        </div>
+        <div
+          class="item2 product-details"
+          onclick="navigate('uses-and-advantages.html')"
+        >
+          Uses and Advantages
+        </div>
+        <div
+          class="item3 product-details"
+          onclick="navigate('indications.html')"
+        >
+          Indications
+        </div>
+        <div
+          class="item4 product-details"
+          onclick="navigate('side-effects.html')"
+        >
+          Side Effects
+        </div>
+      </div>
+      <div id="dropdown-container-vid">
+        <div class="item1 product-details" onclick="navigate('Audio.html')">
+          Audio
+        </div>
+        <div
+          class="item1 product-details"
+          onclick="navigate('amlodipine-vid.html')"
+        >
+          Amlotenol AVP
+        </div>
+      </div>
+      <div id="dropdown-container-qna">
+        <div
+          class="item1 product-details"
+          onclick="navigate('assessments.html')"
+        >
+          Questions
+        </div>
+      </div>
+      <div class="button-nav-container">
+        <button class="button-nav" onclick="navigate('index.html')">
+          Home
+        </button>
+        <button class="button-nav viddeets">
+          Video
+          <div id="opendd-vid"><div class="caret"></div></div>
+        </button>
+        <button
+          class="button-nav productdeets"
+        
+        >
+          Product Details
+          <div id="opendd"><div class="caret"></div></div>
+        </button>
+        <button
+          class="button-nav qnadeets"
+        
+        >
+          Assessments
+          <div id="opendd-qna"><div class="caret"></div></div>
+        </button>
+      </div>
+
+      <button id="refreshButton">
+        <svg
+          viewBox="0 0 16 16"
+          class="bi bi-arrow-repeat"
+          fill="currentColor"
+          height="16"
+          width="16"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"
+          ></path>
+          <path
+            d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"
+            fill-rule="evenodd"
+          ></path>
+        </svg>
+        Refresh
+      </button>
+      <button class="view-results">
+        
+        </svg>
+        View Results
+      </button>
+
+      <!-- Home Banner -->
+      <div class="home-banner">
+        <div id="myHomeBanner" class="carousel slide" data-ride="carousel">
+          <div
+            class="item active"
+            style="background-image: url('images/amlotenol/assessment_bg1.gif')"
+          >
+            <div class="carousel-inner" role="listbox">
+              <div class="background-container">
+                <div class="image-container" id="container1">
+                  <img id="container1Status" src="" alt="" />
+                  <img
+                    class="clickable-image"
+                    src="images/amlotenol/amlotenol_meds.png"
+                    alt="Image 1"
+                  />
+                  <img
+                    class="gif"
+                    src="images/amlotenol/qna-gif-unscreen.gif"
+                    alt="Loading GIF"
+                  />
+                  <img
+                    class="clickable-image"
+                    src="images/amlotenol/q1_meds.png"
+                    alt="Image 2"
+                    data-page=" question1.html"
+                   
+                  />
+                </div>
+
+                <div class="image-container" id="container2">
+                  <img id="container2Status" src="" alt="" />
+                  <img
+                    class="clickable-image"
+                    src="images/amlotenol/amlotenol_meds.png"
+                    alt="Image 1"
+                  />
+                  <img
+                    class="gif"
+                    src="images/amlotenol/qna-gif-unscreen.gif"
+                    alt="Loading GIF"
+                  />
+                  <img
+                    class="clickable-image"
+                    src="images/amlotenol/q2_meds.png"
+                    alt="Image 2"
+                    data-page="question2.html"
+                   
+                  />
+                </div>
+
+                <div class="image-container" id="container3">
+                  <img id="container3Status" src="" alt="" />
+                  <img
+                    class="clickable-image"
+                    src="images/amlotenol/amlotenol_meds.png"
+                    alt="Image 1"
+                  />
+                  <img
+                    class="gif"
+                    src="images/amlotenol/qna-gif-unscreen.gif"
+                    alt="Loading GIF"
+                  />
+                  <img
+                    class="clickable-image"
+                    src="images/amlotenol/q3_meds.png"
+                    alt="Image 2"
+                    data-page="question3.html"
+                  />
+                </div>
+
+                <div class="image-container" id="container4">
+                  <img id="container4Status" src="" alt="" />
+                  <img
+                    class="clickable-image"
+                    src="images/amlotenol/amlotenol_meds.png"
+                    alt="Image 1"
+                  />
+                  <img
+                    class="gif"
+                    src="images/amlotenol/qna-gif-unscreen.gif"
+                    alt="Loading GIF"
+                  />
+                  <img
+                    class="clickable-image"
+                    src="images/amlotenol/q4_meds.png"
+                    alt="Image 2"
+                    data-page="question4.html"
+                  />
+                </div>
+
+                <div class="image-container" id="container5">
+                  <img id="container5Status" src="" alt="" />
+                  <img
+                    class="clickable-image"
+                    src="images/amlotenol/amlotenol_meds.png"
+                    alt="Image 1"
+                  />
+                  <img
+                    class="gif"
+                    src="images/amlotenol/qna-gif-unscreen.gif"
+                    alt="Loading GIF"
+                  />
+                  <img
+                    class="clickable-image"
+                    src="images/amlotenol/q5_meds.png"
+                    alt="Image 2"
+                    data-page="question5.html"
+                  />
+                </div>
+
+                <div class="image-container" id="container6">
+                  <img id="container6Status" src="" alt="" />
+                  <img
+                    class="clickable-image"
+                    src="images/amlotenol/amlotenol_meds.png"
+                    alt="Image 1"
+                  />
+                  <img
+                    class="gif"
+                    src="images/amlotenol/qna-gif-unscreen.gif"
+                    alt="Loading GIF"
+                  />
+                  <img
+                    class="clickable-image"
+                    src="images/amlotenol/q6_meds.png"
+                    alt="Image 2"
+                    data-page="question6.html"
+                  />
+                </div>
+                <div id="popup">
+                  <button class="dismiss" type="button">×</button>
+                  <div class="image">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                      <g
+                        id="SVGRepo_tracerCarrier"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      ></g>
+                      <g id="SVGRepo_iconCarrier">
+                        <path
+                          d="M20 7L9.00004 18L3.99994 13"
+                          stroke="#000000"
+                          stroke-width="1.5"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        ></path>
+                      </g>
+                    </svg>
+                  </div>
+                  <h2 class="pop-up pop-up-title" id="remarks">Congratulations!</h2>
+                  <h2 class="pop-up pop-up-content" id="remarkstext">
+                    You have completed all 6 questions!
+                  </h2>
+                  <h2 id="scoreText" class="pop-up pop-up-score"></h2>
+                  <button id="finishButton">Finish</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <!-- jQuery (necessary for JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAJBFXayR94GL7l9oR1IsNbt-2KtnxpRjQ"></script>
+    <script src="js/custom-google-map.js"></script>
+    <script src="js/plugins.js"></script>
+    <script src="js/custom.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
+      crossorigin="anonymous"
+    ></script>
+    <script src="js/product-details.js"></script>
+
+    <script src="script.js"></script>
+    <script
+      type="text/javascript"
+      language="javascript"
+      src="js/control.js"
+    ></script>
+  </body>
+</html>

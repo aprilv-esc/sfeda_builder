@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ChartAge</title>
+    <link rel="stylesheet" href="css/style-age.css" />
+    <link href="css/style.css" rel="stylesheet" />
+    <link rel="stylesheet" href="css/button-styles.css" />
+    <!-- <link href="css/button-styles.css" rel="stylesheet" /> -->
+  </head>
+  <body style="background-image: url('images/amlotenol/graph-bg1.png')">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script> -->
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"
+      integrity="sha512-JPcRR8yFa8mmCsfrw4TNte1ZvF1e3+1SdGMslZvmrzDYxS69J7J49vkFL8u6u8PlPJK+H3voElBtUCzaXj+6ig=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <div class="h2-container">
+      <div class="h2-container2">
+        <h2>
+          Effectiveness of Amlodipine on Blood Pressure Control in Hypertensive
+          Patients by Age Bracket
+        </h2>
+      </div>
+    </div>
+    <a href="#" id="backButton">
+      <img
+        src="images/amlotenol/prev-btn1.png"
+        alt="Go Back"
+        class="prev-btn"
+      />
+    </a>
+    <div id="dropdown-container-pd">
+      <div
+        class="item1 product-details"
+        onclick="navigate('effectiveness-graph-by-age.html')"
+      >
+        Amlotenol Graph
+      </div>
+      <div
+        class="item2 product-details"
+        onclick="navigate('uses-and-advantages.html')"
+      >
+        Uses and Advantages
+      </div>
+      <div class="item3 product-details" onclick="navigate('indications.html')">
+        Indications
+      </div>
+      <div
+        class="item4 product-details"
+        onclick="navigate('side-effects.html')"
+      >
+        Side Effects
+      </div>
+    </div>
+    <div id="dropdown-container-vid">
+      <div class="item1 product-details" onclick="navigate('Audio.html')">
+        Audio
+      </div>
+      <div
+        class="item1 product-details"
+        onclick="navigate('amlodipine-vid.html')"
+      >
+        Amlotenol AVP
+      </div>
+    </div>
+    <div id="dropdown-container-qna">
+      <div class="item1 product-details" onclick="navigate('assessments.html')">
+        Questions
+      </div>
+    </div>
+    <div class="button-nav-container">
+      <button class="button-nav" onclick="navigate('index.html')">Home</button>
+      <button class="button-nav viddeets">
+        Video
+        <div id="opendd-vid"><div class="caret"></div></div>
+      </button>
+      <button class="button-nav productdeets">
+        Product Details
+        <div id="opendd"><div class="caret"></div></div>
+      </button>
+      <button class="button-nav qnadeets">
+        Assessments
+        <div id="opendd-qna"><div class="caret"></div></div>
+      </button>
+    </div>
+
+    <div class="container">
+      <div id="buttonContainer">
+        <button class="button-graph" id="btnMono">
+          Amlodipine monotherapy
+        </button>
+        <button class="button-graph" id="btnPlusOne">Amlodipine + 1AHD</button>
+        <button class="button-graph" id="btnPlusTwo">Amlodipine + 2AHD</button>
+        <button class="button-graph" id="btnPlusThree">
+          Amlodipine + 3AHD
+        </button>
+      </div>
+
+      <!-- <div id="ageContainer">
+              <div>
+                <label>
+                  <input class="option-input radio" type="radio" name="age" value="0" checked>
+                  <span>
+                    Age=0
+                  </span>
+                </label>
+                <label>
+                  <input class="option-input radio" type="radio" name="age" value="45">
+                  <span>
+                    Age≤45
+                  </span>
+                </label>
+                <label>
+                  <input class="option-input radio" type="radio" name="age" value="65">
+                  <span>
+                    Age≥65
+                  </span>
+                </label>
+              </div>
+            </div> -->
+      <div class="inner-container">
+        <div class="parent-container">
+          <div class="custom-slider">
+            <div style="display: flex; font: 14px Arial">
+              <div class="slider-value zero">Age=0</div>
+              <div class="slider-value fortyFive">Age≤45</div>
+              <div class="slider-value sixtyFive">Age≥65</div>
+            </div>
+            <input
+              type="range"
+              id="valueSlider"
+              min="0"
+              max="2"
+              step="1"
+              value="0"
+            />
+          </div>
+        </div>
+        <div id="myChart2Container">
+          <canvas id="myChart2"></canvas>
+          <!-- <canvas id="customTextCanvas" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"></canvas> -->
+          <div class="sample">
+            <canvas
+              id="customTextCanvas"
+              width="450"
+              height="250"
+              style="
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -70%);
+              "
+            ></canvas>
+          </div>
+          <!-- <span class="info"
+                  >Proportion of patients with essential hypertension who achieved
+                  individualized blood pressure goals after therapy with amlodipine as
+                  per ESC/ESH 2018 guidelines—subgroup analysis by age. SBP target
+                  was < 140 mmHg and DBP target was < 90 mmHg for patients aged ≤ 45
+                  years. SBP target was < 140 mmHg and DBP target was < 80 mmHg for
+                  patients aged ≥ 65 years. AHD antihypertensive drug, BP blood
+                  pressure, DBP diastolic BP, ESC/ESH European Society of
+                  Cardiology/European Society of Hypertension, SBP systolic BP</span
+                > -->
+        </div>
+      </div>
+    </div>
+    <script src="js/product-details.js"></script>
+
+    <script src="script-age.js"></script>
+  </body>
+</html>

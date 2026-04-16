@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+    />
+    <title>
+      How long will it take for amlodipine to lower my blood pressure?
+    </title>
+    <!-- Favicon -->
+    <link
+      rel="shortcut icon"
+      href="images/favicon.png"
+      sizes="16x16"
+      type="image/x-icon"
+    />
+    <!-- Bootstrap, Owl Carousel and Animate.css -->
+    <link href="css/plugins.css" rel="stylesheet" />
+    <!-- Custom -->
+    <link href="css/style.css" rel="stylesheet" />
+    <link href="css/button-styles.css" rel="stylesheet" />
+    <!-- FontAwesome -->
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <!-- Responsive css -->
+    <link href="css/media.css" rel="stylesheet" />
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body id="top">
+    <main id="aspect-ratio-container">
+      <a href="#" id="backButton">
+        <img
+          src="images/amlotenol/prev-btn1.png"
+          alt="Go Back"
+          class="prev-btn"
+        />
+      </a>
+      <div id="dropdown-container-pd">
+        <div
+          class="item1 product-details"
+          onclick="navigate('effectiveness-graph-by-age.html')"
+        >
+          Amlotenol Graph
+        </div>
+        <div
+          class="item2 product-details"
+          onclick="navigate('uses-and-advantages.html')"
+        >
+          Uses and Advantages
+        </div>
+        <div
+          class="item3 product-details"
+          onclick="navigate('indications.html')"
+        >
+          Indications
+        </div>
+        <div
+          class="item4 product-details"
+          onclick="navigate('side-effects.html')"
+        >
+          Side Effects
+        </div>
+      </div>
+      <div id="dropdown-container-vid">
+        <div
+          class="item1 product-details"
+          onclick="navigate('amlodipine-vid.html')"
+        >
+          Audio
+        </div>
+        <div
+          class="item1 product-details"
+          onclick="navigate('amlodipine-vid.html')"
+        >
+          Amlotenol AVP
+        </div>
+      </div>
+      <div id="dropdown-container-qna">
+        <div
+          class="item1 product-details"
+          onclick="navigate('assessments.html')"
+        >
+          Questions
+        </div>
+      </div>
+      <div class="button-nav-container">
+        <button class="button-nav" onclick="navigate('index.html')">
+          Home
+        </button>
+        <button class="button-nav viddeets">
+          Video
+          <div id="opendd-vid"><div class="caret"></div></div>
+        </button>
+        <button class="button-nav productdeets">
+          Product Details
+          <div id="opendd"><div class="caret"></div></div>
+        </button>
+        <button class="button-nav qnadeets">
+          Assessments
+          <div id="opendd-qna"><div class="caret"></div></div>
+        </button>
+      </div>
+      <header class="header">
+        <div class="container">
+          <div class="navbar-header">
+            <button
+              type="button"
+              class="navbar-toggle collapsed"
+              data-toggle="collapse"
+              data-target="#topnav"
+              aria-expanded="false"
+            >
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar top-bar"></span>
+              <span class="icon-bar middle-bar"></span>
+              <span class="icon-bar bottom-bar"></span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Home Banner -->
+      <div class="home-banner">
+        <div id="myHomeBanner" class="carousel slide" data-ride="carousel">
+          <!-- Indicators -->
+          <!-- <ol class="carousel-indicators">
+            <li
+              data-target="#myHomeBanner"
+              data-slide-to="0"
+              class="active"
+            ></li>
+            <li data-target="#myHomeBanner" data-slide-to="1"></li>
+            <li data-target="#myHomeBanner" data-slide-to="2"></li>
+          </ol> -->
+          <!-- Wrapper for slides -->
+          <div class="carousel-inner" role="listbox">
+            <div
+              class="item active"
+              style="
+                background-image: url('images/amlotenol/amlotenol-vid-bg.png');
+              "
+            >
+              <div class="vid-container">
+                <div class="banner-text">
+                  <audio id="myAudio">
+                    <source src="test-sounds.mp3" type="audio/mpeg" />
+                    Your browser does not support the audio element.
+                  </audio>
+
+                  <button class="play-audio" onclick="playAudio()">
+                    <img src="images/amlotenol/play.png" alt="" />
+                  </button>
+                  <button class="pause-audio" onclick="pauseAudio()">
+                    <img src="images/amlotenol/pause.png" alt="" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <!-- jQuery (necessary for JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAJBFXayR94GL7l9oR1IsNbt-2KtnxpRjQ"></script>
+    <script src="js/custom-google-map.js"></script>
+    <script src="js/plugins.js"></script>
+    <script src="js/custom.js"></script>
+    <script src="js/product-details.js"></script>
+    <script src="script.js"></script>
+    <script>
+      var audio = document.getElementById("myAudio");
+
+      function playAudio() {
+        audio.play();
+        console.log("play");
+      }
+
+      function pauseAudio() {
+        audio.pause();
+      }
+
+      function stopAudio() {
+        audio.pause();
+        audio.currentTime = 0;
+      }
+    </script>
+    <script
+      type="text/javascript"
+      language="javascript"
+      src="js/control.js"
+    ></script>
+  </body>
+</html>

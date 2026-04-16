@@ -1,0 +1,37 @@
+.theme-3 .header { background: rgba(0,0,0,0); border-bottom: solid 2px rgba(0,0,0,0.50); }
+.theme-3 .header.fixed { background: rgba(0,0,0,0.80); }
+.theme-3 .header .logo a, .theme-3 .topnav li a { color: #fff; }
+.topnav li>a:hover, .topnav li >a:focus, .theme-3 .topnav li.active>a, .theme-3 .topnav li >a.active { color: #f26767; }
+.theme-3 .topnav li ul { background: rgba(0,0,0,0.50); }
+.theme-3 .overview-wrapper { background: #f26867; }
+.theme-3 .overview-wrapper .overview-block .icons { color: #fff; }
+.theme-3 .overview-wrapper .overview-block h3, .theme-3 .overview-wrapper .overview-block p { color: #fff; }
+.theme-3 .overview-wrapper .overview-block h3:after { background: #fff; }
+.theme-3 .home-banner .carousel-control:hover { background: #f26767; color: #fff; }
+.spacer { display: block; height: 60px; }
+.theme-3 .progress { background: #fff; }
+.theme-3 .testimonials-wrapper { background: #f26767; }
+.theme-3 .testimonials-wrapper a { color: #fff; }
+.theme-3 .testimonials-wrapper a:hover, .theme-3 .testimonials-wrapper a:focus { color: #34363e; }
+.theme-3 .testimonials-wrapper:after { border-color: #fff transparent transparent transparent; }
+.theme-3 #testimonials .owl-nav>div { background: #fff; color: #f26767; }
+.theme-3 #testimonials .owl-nav>div:hover { background: #f47e7e; color: #fff; }
+.theme-3 .our-blogs-wrapper .blogbox.big { margin-bottom: 50px; }
+.theme-3 .blogbox { background: #fff; text-align: left; padding: 10px; }
+.theme-3 .blogbox p { text-align: left; }
+.theme-3 .blogbox h3 { margin-bottom: 5px; text-transform: uppercase; font-size: 30px; color: #454545; }
+.theme-3 .blogbox h3 a { color: #454545; }
+.theme-3 .blogbox h3 a:hover, .theme-3 .blogbox h3 a:focus { color: #f26767; }
+.theme-3 .blogbox cite { font-style: normal; margin-bottom: 12px; display: block; }
+.theme-3 .blogbox cite strong { color: #f26767; }
+.theme-3 .blogbox p { color: #6a6a6a; font-weight: 300; }
+.theme-3 .our-blogs-wrapper .btn-color:hover { color:#fff; border-color:#f26767}
+.theme-3 .contact-info-bar { background: #f26767; }
+.notes-and-skills .panel-group { text-align: left; }
+.notes-and-skills .panel-group .panel-title { background: #fff; margin-bottom: 10px; font-family: 'Oswald', sans-serif; font-size: 18px; color: #454545; font-weight: 700; text-transform: uppercase; position: relative; }
+.notes-and-skills .panel-group .panel-title a { color: #454545; padding: 20px 32px; display: block; }
+.notes-and-skills .panel-group .panel-title a:hover, .notes-and-skills .panel-group .panel-title a[aria-expanded="true"] { color: #f26767; }
+.notes-and-skills .panel-group .panel-title a:after { content: "\f067"; position: absolute; top: 50%; right: 20px; font: normal normal normal 14px/1 FontAwesome; color: #454545; -webkit-transform: translateY(-50%); transform: translateY(-50%); }
+.notes-and-skills .panel-group .panel-title a[aria-expanded="true"]:after { content: "\f00d"; color: #f26767; }
+.notes-and-skills .panel-group .panel-body { background: #fff; padding: 20px 30px; margin-bottom: 10px; }
+.notes-and-skills .panel-group .panel-body p { font-size: 14px; font-family: 'Merriweather', serif; color: #6a6a6a; font-weight: 300; line-height: 1.8; text-align: left; margin-bottom: 10px; }

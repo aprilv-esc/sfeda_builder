@@ -1,0 +1,33 @@
+.theme-4 .header { background: #fff; box-shadow: 0px 0px 0px rgba(0, 0, 0, 0.22); }
+.theme-4 .header.fixed { background: #fff; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.22); }
+.theme-4 .header .logo a, .theme-4 .topnav li a { color: #454545; }
+.theme-4 .topnav li:hover>a, .theme-4 .topnav li.active>a { color: #f26767; }
+.theme-4 .topnav li ul, .theme-4 .header.fixed .topnav li ul, .theme-4 .overview-wrapper { background: #fff; }
+.theme-4 .home-banner .carousel-control:hover { background: #f26767; color: #fff; }
+.theme-4 .latest-works { padding: 100px 0 80px; }
+.theme-4 .latest-works>.container { max-width: 1200px; }
+.theme-4 .progress { background: #eceef6; }
+.theme-4 .showcase { background: #eceef6; }
+.theme-4 .notes-and-skills { background: #fff; }
+.theme-4 .our-blogs-wrapper { background-position: center center; background-repeat: no-repeat; background-size: cover; position: relative; }
+.theme-4 .our-blogs-wrapper:before { content: ""; position: absolute; top: 0px; bottom: 0px; left: 0px; right: 0px; background: rgba(0, 0, 0, 0.7); z-index: 0; }
+.theme-4 .our-blogs-wrapper h2, .theme-4 .our-blogs-wrapper p { color: #fff; }
+.theme-4 .blogbox { background: #fff; text-align: left; padding: 20px; margin-bottom: 60px; }
+.theme-4 .our-blogs-wrapper .blogbox .blog-content { padding: 20px 10px 10px; }
+.theme-4 .blogbox p { text-align: left; }
+.theme-4 .blogbox h3 { margin-bottom: 5px; text-transform: uppercase; font-size:30px; color: #454545; }
+.theme-4 .blogbox h3 a { color: #454545; }
+.theme-4 .blogbox h3 a:hover, .theme-4 .blogbox h3 a:focus { color: #f26767; }
+.theme-4 .blogbox cite { font-style: normal; margin-bottom: 12px; display: block; }
+.theme-4 .blogbox cite strong { color: #f26767; }
+.theme-4 .blogbox p { color: #6a6a6a; font-weight: 300; }
+.theme-4 .blogs-container .btn-color { border-color:#fff; color:#fff;}
+.theme-4 .blogs-container .btn-color:hover,.theme-4 .blogs-container .btn-color:focus,.theme-4 .blogs-container .btn-color:active { border-color:#f26767}
+.theme-4 .contact-info-bar { background: #f26767; }
+.theme-4 .contact-info-bar p a:hover, .theme-4 .contact-info-bar p a:focus { color: #34363e; }
+.theme-4 .buy-khamu-wrapper { background: url(../images/theme-4/buy-khamu-bg.jpg) no-repeat center; background-size: cover; position: relative; }
+.theme-4 .buy-khamu-wrapper:after { content: ""; background: rgba(0,0,0,0.8); display: block; top: 0; right: 0; left: 0; bottom: 0; position: absolute; z-index: 0; }
+.theme-4 .buy-khamu-wrapper .container { position: relative; z-index: 1; }
+.theme-4 .buy-khamu-wrapper h3:before { background: #f26767; }
+.theme-4 .buy-khamu-wrapper h3 strong { color: #f26767; }
+.theme-4 .our-clients-wrapper .owl-carousel { margin: 0 auto; }

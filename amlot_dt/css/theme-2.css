@@ -1,0 +1,27 @@
+.theme-2 .header { background: #fff; box-shadow: 0px 0px 0px rgba(0, 0, 0, 0.22); }
+.theme-2 .header.fixed { background: #fff; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.22); }
+.theme-2 .header .logo a, .theme-2 .topnav li a { color: #454545; }
+.theme-2 .topnav li:hover>a, .theme-2 .topnav li.active>a { color: #f26767; }
+.theme-2 .topnav li ul, .theme-2 .header.fixed .topnav li ul, .theme-2 .overview-wrapper { background: #fff; }
+.theme-2 .home-banner .carousel-control:hover { background: #f26767; color: #fff; }
+.theme-2 .latest-works { padding: 100px 0 80px; }
+.theme-2 .latest-works>.container { max-width: 1198px; }
+.theme-2 .progress { background: #fff; }
+.theme-2 .progress-bars h3 { margin: 0 0 16px; }
+/** Showcase End **/
+
+.theme-2 .notes-and-skills { background: #eceef6; }
+.theme-2 .pricing-plan-wrapper { background-position: center center; background-repeat: no-repeat; background-size: cover; position: relative; }
+.theme-2 .pricing-plan-wrapper:before { content: ""; position: absolute; top: 0px; bottom: 0px; left: 0px; right: 0px; background: rgba(0, 0, 0, 0.7); z-index: 0; }
+.theme-2 .pricing-plan-wrapper h2, .theme-2 .pricing-plan-wrapper p { color: #fff; }
+.theme-2 .pricing-plan-wrapper .container { position: relative; z-index: 1; }
+.theme-2 .blogbox { background: #fff; text-align: left; padding: 10px; }
+.theme-2 .blogbox p { text-align: left; }
+.theme-2 .blogbox h3 { margin-bottom: 5px; text-transform: uppercase; font-size: 24px; color: #454545; }
+.theme-2 .blogbox h3 a { color: #454545; }
+.theme-2 .blogbox h3 a:hover, .theme-2 .blogbox h3 a:focus { color: #f26767; }
+.theme-2 .blogbox cite { font-style: normal; margin-bottom: 12px; display: block; }
+.theme-2 .blogbox cite strong { color: #f26767; }
+.theme-2 .blogbox p { color: #6a6a6a; font-weight: 300; }
+.theme-2 .contact-info-bar { background: #f26767; }
+.theme-2 .contact-info-bar p a:hover, .theme-2 .contact-info-bar p a:focus { color: #34363e; }

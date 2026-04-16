@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.env
+venv/
+.venv/
+
+# Backend storage (generated files, not for git)
+backend/storage/
+
+# Node / Angular
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+
+# OS
+.DS_Store
+Thumbs.db

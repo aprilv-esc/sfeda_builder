@@ -1,0 +1,179 @@
+<div class="container animate-fade-in">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+    <h1>Detailing Aid Builder</h1>
+    <div>
+      <button *ngIf="projectId" class="btn btn-secondary" style="margin-right: 1rem;" (click)="resetApp()">Start Over</button>
+      <button id="tour-help" class="btn btn-secondary" (click)="startTour()">Help & Tour</button>
+    </div>
+  </div>
+
+  <div class="card" *ngIf="!projectId" id="step1-upload">
+    <h2>1. Upload Source File</h2>
+    <p style="color: var(--text-muted); margin-bottom: 2rem; margin-top: 0.5rem;">
+      Upload a PDF, or an HTML ZIP file. We will convert it into an SFE-accepted Detailing Aid.
+    </p>
+    
+    <div style="border: 2px dashed var(--border); border-radius: 12px; padding: 3rem; text-align: center; background: var(--bg);">
+      <input type="file" (change)="onFileChange($event)" accept=".pdf,.zip" id="fileInput" style="display: none;" />
+      
+      <label for="fileInput" class="btn" style="margin-bottom: 1rem;">
+        Browse File
+      </label>
+      
+      <div *ngIf="fileToUpload" style="font-weight: 500; color: var(--primary);">
+        Selected: {{ fileToUpload.name }}
+      </div>
+      
+      <div *ngIf="uploadError" style="color: #EF4444; margin-top: 1rem;">
+        {{ uploadError }}
+      </div>
+      
+      <div style="margin-top: 2rem;" *ngIf="fileToUpload">
+        <button class="btn" (click)="uploadFile()" [disabled]="isUploading" style="width: 100%;">
+          {{ isUploading ? 'Processing...' : 'Upload & Process' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="projectId" class="animate-fade-in">
+    <div class="card" id="step2-rename" style="margin-bottom: 2rem;">
+      <h2>2. View & Rename Pages</h2>
+      <p style="color: var(--text-muted); margin-bottom: 2rem; margin-top: 0.5rem;">
+        Rule #6: Individual HTML pages must be named descriptively based on contents.
+      </p>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem;">
+        <div *ngFor="let page of pages; let i = index" style="border: 1px solid var(--border); border-radius: 8px; padding: 1rem; background: var(--bg);">
+          <div style="font-weight: 600; margin-bottom: 0.5rem; color: var(--text-muted);">Slide {{ i + 1 }}</div>
+          
+          <div style="width: 100%; aspect-ratio: 4/3; background: #E5E7EB; border-radius: 6px; margin-bottom: 1rem; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative; user-select: none;"
+               (mousedown)="onMouseDown($event, page)" 
+               (mousemove)="onMouseMove($event, page)" 
+               (mouseup)="onMouseUp(page)" 
+               (mouseleave)="onMouseUp(page)"
+               [style.cursor]="page.video_name ? 'crosshair' : 'default'">
+               
+            <img *ngIf="page.image_name" [src]="API_BASE + '/storage/' + projectId + '/images/' + page.image_name" style="max-width: 100%; max-height: 100%; object-fit: contain; pointer-events: none;" alt="Slide preview" onerror="this.style.display='none'"/>
+            <span *ngIf="!page.image_name" style="color: var(--text-muted); pointer-events: none;">No Preview / HTML Native</span>
+            
+            <div *ngIf="page.video_name" 
+                 style="position: absolute; border: 2px solid rgba(239, 68, 68, 0.8); background: rgba(239, 68, 68, 0.2); pointer-events: none; z-index: 10; border-radius: 4px;"
+                 [style.top.%]="page.video_top" 
+                 [style.left.%]="page.video_left" 
+                 [style.width.%]="page.video_width" 
+                 [style.height.%]="page.video_height">
+            </div>
+            
+            <!-- Contextual Help popup overlay -->
+            <div *ngIf="page.video_name && !page.video_width" style="position: absolute; bottom: 8px; font-size: 0.7rem; color: #fff; background: rgba(0,0,0,0.6); padding: 4px 8px; border-radius: 4px; pointer-events: none;">
+              Click & drag to draw video box
+            </div>
+          </div>
+
+          <label style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem;">HTML Filename</label>
+          <input type="text" [(ngModel)]="page.new_html_name" [disabled]="i === 0" placeholder="e.g. ProductBenefits.html">
+          <div *ngIf="i === 0" style="font-size: 0.75rem; color: var(--secondary); margin-top: 0.25rem;">
+            * Rule enforced: Landing page must be index.html
+          </div>
+          
+          <label style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem; margin-top: 1rem;">Attached Media (Video)</label>
+          <div *ngIf="page.video_name" style="margin-bottom: 0.5rem; color: var(--primary); font-size: 0.875rem; font-weight: 600;">
+            ✓ {{ page.video_name }} attached
+          </div>
+          <input type="file" style="font-size: 0.8rem;" accept="video/mp4,video/webm" (change)="uploadSlideMedia($event, page)">
+          <div *ngIf="page.isUploadingMedia" style="font-size: 0.75rem; color: var(--secondary); margin-top: 0.25rem;">Uploading video...</div>
+          
+          <div *ngIf="page.video_name" style="margin-top: 1rem; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px; background: #f9fafb;">
+            <div style="font-size: 0.8rem; margin-bottom: 0.5rem; font-weight: bold; color: var(--text-main);">Video Position (%)</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.8rem;">
+              <div>Top:<br><input type="number" [(ngModel)]="page.video_top" style="width:100%; padding: 0.25rem; border-radius: 4px; border: 1px solid var(--border);" placeholder="Top %"></div>
+              <div>Left:<br><input type="number" [(ngModel)]="page.video_left" style="width:100%; padding: 0.25rem; border-radius: 4px; border: 1px solid var(--border);" placeholder="Left %"></div>
+              <div>Width:<br><input type="number" [(ngModel)]="page.video_width" style="width:100%; padding: 0.25rem; border-radius: 4px; border: 1px solid var(--border);" placeholder="Width %"></div>
+              <div>Height:<br><input type="number" [(ngModel)]="page.video_height" style="width:100%; padding: 0.25rem; border-radius: 4px; border: 1px solid var(--border);" placeholder="Height %"></div>
+            </div>
+            
+            <button class="btn btn-secondary" style="width: 100%; margin-top: 1rem; padding: 0.5rem; font-size: 0.8rem; border-color: var(--primary); color: var(--primary);" (click)="openModal(page)">
+              🔍 Maximize & Edit Position
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="step3-generate" style="text-align: center;">
+      <h2>3. Generate Detailing Aid</h2>
+      <p style="color: var(--text-muted); margin-top: 0.5rem; margin-bottom: 2rem;">
+        All HTML rules and parameters will be automatically applied to the generated ZIP.
+      </p>
+      
+      <div style="display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; margin-bottom: 2rem; text-align: left;">
+        <div>
+          <label style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.4rem; color: var(--text-muted);">⬅ ➡ Arrow Buttons Position</label>
+          <select [(ngModel)]="navArrowsPosition" style="padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); font-size: 0.9rem; cursor: pointer;">
+            <option value="top">Top</option>
+            <option value="middle">Middle</option>
+            <option value="bottom">Bottom</option>
+          </select>
+        </div>
+        <div>
+          <label style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.4rem; color: var(--text-muted);">⌂ Home Button Position</label>
+          <select [(ngModel)]="homePosition" style="padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); font-size: 0.9rem; cursor: pointer;">
+            <option value="top-left">Top Left</option>
+            <option value="top-right">Top Right</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+        <button class="btn" style="font-size: 1.125rem; padding: 1rem 2rem; box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.4);" (click)="generateZip()" [disabled]="isGenerating">
+          {{ isGenerating ? 'Packaging Detailing Aid...' : (downloadUrl ? 'Update & Re-Generate' : 'Generate Detailing Aid') }}
+        </button>
+      </div>
+      
+      <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; margin-top: 1.5rem;" *ngIf="downloadUrl">
+        <button class="btn btn-secondary" style="font-size: 1.125rem; padding: 1rem 2rem;" (click)="previewAid()">
+          👁️ Preview Latest Output
+        </button>
+        <button class="btn" style="font-size: 1.125rem; padding: 1rem 2rem; box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.4); background: #10B981;" (click)="downloadFinal()">
+          📥 Download Final ZIP
+        </button>
+      </div>
+      
+      <div *ngIf="downloadUrl" style="margin-top: 1rem; color: var(--secondary); font-weight: 500;">
+        Successfully built! You can preview it natively, or make changes above and Re-Generate!
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- High Precision Edit Modal -->
+<div *ngIf="activeModalPage" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+  
+  <div style="width: 100%; max-width: 90vw; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+    <div style="color: white; font-size: 1.25rem; font-weight: 600;">High-Precision Bounding Box Editor</div>
+    <button class="btn" style="background: #10B981; padding: 0.5rem 1.5rem;" (click)="closeModal()">Save & Close</button>
+  </div>
+  
+  <div style="position: relative; display: inline-block; max-width: 90vw; max-height: 80vh; background: #fff; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border-radius: 8px; overflow: hidden; user-select: none; cursor: crosshair;"
+       (mousedown)="onMouseDown($event, activeModalPage)" 
+       (mousemove)="onMouseMove($event, activeModalPage)" 
+       (mouseup)="onMouseUp(activeModalPage)" 
+       (mouseleave)="onMouseUp(activeModalPage)">
+       
+    <img *ngIf="activeModalPage.image_name" [src]="API_BASE + '/storage/' + projectId + '/images/' + activeModalPage.image_name" style="max-height: 80vh; max-width: 90vw; display: block; pointer-events: none;" alt="Maximized Slide" onerror="this.style.display='none'"/>
+    
+    <!-- Red layout box perfectly tracked to mouse math -->
+    <div *ngIf="activeModalPage.video_name" 
+         style="position: absolute; border: 3px solid rgba(239, 68, 68, 0.9); background: rgba(239, 68, 68, 0.2); pointer-events: none; z-index: 10;"
+         [style.top.%]="activeModalPage.video_top" 
+         [style.left.%]="activeModalPage.video_left" 
+         [style.width.%]="activeModalPage.video_width" 
+         [style.height.%]="activeModalPage.video_height">
+    </div>
+  </div>
+  
+  <div style="color: #e5e7eb; margin-top: 1.5rem; font-size: 0.9rem;">
+    Click and drag to precisely trace your video footprint across the canvas. Both inputs effortlessly replicate mathematical coordinates.
+  </div>
+</div>
