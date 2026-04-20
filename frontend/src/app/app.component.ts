@@ -30,6 +30,10 @@ export class AppComponent implements OnInit {
   navArrowsPosition: string = 'bottom';  // 'top' | 'middle' | 'bottom'
   homePosition: string = 'top-right';    // 'top-left' | 'top-right'
   
+  // New drawing state
+  drawingMode: 'video' | 'home' | 'nav' | 'menu' = 'video';
+  activeHotspot: any = null;
+  
   API_BASE = (window as any).__ENV_API_BASE__ || 'http://localhost:8000';
 
   constructor(private http: HttpClient) {}
@@ -45,15 +49,16 @@ export class AppComponent implements OnInit {
   startTour() {
     introJs().setOptions({
       disableInteraction: false,
+      showProgress: true,
       steps: [
         {
           title: 'Welcome!',
-          intro: 'Welcome to the Detailing Aid Converter! This tool helps you convert PPTX/PDF to SFE-compatible HTML.'
+          intro: 'Welcome to the Detailing Aid Converter! This tool helps you convert PDF or HTML slides into SFE-compatible Detailing Aids.'
         },
         {
           element: document.querySelector('#step1-upload'),
-          title: 'Upload',
-          intro: 'First, select and upload your PPTX, PDF, or HTML ZIP file here.'
+          title: 'Step 1: Upload Source',
+          intro: 'Select your source PDF or HTML ZIP file. We will automatically parse the slides and suggest filenames.'
         },
         {
           element: document.querySelector('#tour-help'),
@@ -67,16 +72,37 @@ export class AppComponent implements OnInit {
   tourPages() {
     introJs().setOptions({
       disableInteraction: false,
+      showProgress: true,
       steps: [
         {
           element: document.querySelector('#step2-rename'),
-          title: 'Step 2: Rename',
-          intro: 'Here you can see the parsed pages. You can click on the text box and give each file a descriptive name.'
+          title: 'Step 2: Rename & Multimedia',
+          intro: 'Manage your slides here. You can rename the HTML files to be more descriptive (e.g., "ProductBenefits.html") instead of "slide_1.html".'
+        },
+        {
+          element: document.querySelector('.media-upload-area'),
+          title: 'Attach Media',
+          intro: 'Want to embed a video? Upload it here for a specific slide!'
+        },
+        {
+          element: document.querySelector('.thumbnail-canvas-container'),
+          title: 'Interactive Bounding Box',
+          intro: 'Once a video is attached, click and drag directly on the thumbnail to define exactly where the video should play!'
+        },
+        {
+          element: document.querySelector('.maximize-btn'),
+          title: 'High-Precision Editing',
+          intro: 'For pixel-perfect accuracy, use the Maximize tool to draw your bounding box on a fullscreen view of the slide.'
+        },
+        {
+          element: document.querySelector('#global-settings'),
+          title: 'Global Navigation Setup',
+          intro: 'Choose where the Home and Navigation button arrows should appear across all slides (Top, Middle, or Bottom).'
         },
         {
           element: document.querySelector('#step3-generate'),
-          title: 'Step 3: Generate',
-          intro: 'Once ready, click here to package and download your converted Detailing Aid ZIP!'
+          title: 'Step 3: Generate & Preview',
+          intro: 'Click Generate to build your project. You can then Preview the output in the browser to verify the video placement before downloading the final ZIP.'
         }
       ]
     }).start();
@@ -103,7 +129,8 @@ export class AppComponent implements OnInit {
         // set default new names
         this.pages = res.pages.map((p: any, index: number) => ({
           ...p,
-          new_html_name: index === 0 ? 'index.html' : p.html_name
+          new_html_name: index === 0 ? 'index.html' : p.html_name,
+          hotspots: p.hotspots || []
         }));
         this.isUploading = false;
         
@@ -201,8 +228,6 @@ export class AppComponent implements OnInit {
   }
 
   onMouseDown(event: MouseEvent, page: any) {
-    if (!page.video_name) return;
-    
     // Prevent default drag
     event.preventDefault();
     page.isDrawing = true;
@@ -211,18 +236,35 @@ export class AppComponent implements OnInit {
     const rect = container.getBoundingClientRect();
     
     // Calculate percentages
-    page._startX = ((event.clientX - rect.left) / rect.width) * 100;
-    page._startY = ((event.clientY - rect.top) / rect.height) * 100;
-    
-    // Reset visually
-    page.video_left = Math.max(0, Math.min(100, page._startX));
-    page.video_top = Math.max(0, Math.min(100, page._startY));
-    page.video_width = 0;
-    page.video_height = 0;
+    const startX = ((event.clientX - rect.left) / rect.width) * 100;
+    const startY = ((event.clientY - rect.top) / rect.height) * 100;
+    page._startX = startX;
+    page._startY = startY;
+
+    if (this.drawingMode === 'video') {
+      page.video_left = Math.max(0, Math.min(100, page._startX));
+      page.video_top = Math.max(0, Math.min(100, page._startY));
+      page.video_width = 0;
+      page.video_height = 0;
+    } else {
+      // Create a new hotspot
+      const newHotspot = {
+        id: Math.random().toString(36).substr(2, 9),
+        type: this.drawingMode,
+        left: startX,
+        top: startY,
+        width: 0,
+        height: 0,
+        target: '',
+        menuItems: this.drawingMode === 'menu' ? [] : undefined
+      };
+      page.hotspots.push(newHotspot);
+      this.activeHotspot = newHotspot;
+    }
   }
 
   onMouseMove(event: MouseEvent, page: any) {
-    if (!page.isDrawing || !page.video_name) return;
+    if (!page.isDrawing) return;
     event.preventDefault();
 
     const container = event.currentTarget as HTMLElement;
@@ -231,7 +273,6 @@ export class AppComponent implements OnInit {
     const currentX = ((event.clientX - rect.left) / rect.width) * 100;
     const currentY = ((event.clientY - rect.top) / rect.height) * 100;
     
-    // Calculate width and height natively permitting opposite dragging
     let left = Math.min(page._startX, currentX);
     let top = Math.min(page._startY, currentY);
     let width = Math.abs(currentX - page._startX);
@@ -243,14 +284,37 @@ export class AppComponent implements OnInit {
     if (left + width > 100) width = 100 - left;
     if (top + height > 100) height = 100 - top;
     
-    page.video_left = parseFloat(left.toFixed(1));
-    page.video_top = parseFloat(top.toFixed(1));
-    page.video_width = parseFloat(width.toFixed(1));
-    page.video_height = parseFloat(height.toFixed(1));
+    if (this.drawingMode === 'video') {
+      page.video_left = parseFloat(left.toFixed(1));
+      page.video_top = parseFloat(top.toFixed(1));
+      page.video_width = parseFloat(width.toFixed(1));
+      page.video_height = parseFloat(height.toFixed(1));
+    } else if (this.activeHotspot) {
+      this.activeHotspot.left = parseFloat(left.toFixed(1));
+      this.activeHotspot.top = parseFloat(top.toFixed(1));
+      this.activeHotspot.width = parseFloat(width.toFixed(1));
+      this.activeHotspot.height = parseFloat(height.toFixed(1));
+    }
   }
 
   onMouseUp(page: any) {
-    if (page.isDrawing) page.isDrawing = false;
+    if (page.isDrawing) {
+      page.isDrawing = false;
+      this.activeHotspot = null;
+    }
+  }
+
+  deleteHotspot(page: any, hotspot: any) {
+    page.hotspots = page.hotspots.filter((h: any) => h.id !== hotspot.id);
+  }
+
+  addMenuItem(hotspot: any) {
+    if (!hotspot.menuItems) hotspot.menuItems = [];
+    hotspot.menuItems.push({ label: 'New Item', target: '' });
+  }
+
+  removeMenuItem(hotspot: any, index: number) {
+    hotspot.menuItems.splice(index, 1);
   }
 
   openModal(page: any) {

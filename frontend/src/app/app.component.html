@@ -42,17 +42,22 @@
       <p style="color: var(--text-muted); margin-bottom: 2rem; margin-top: 0.5rem;">
         Rule #6: Individual HTML pages must be named descriptively based on contents.
       </p>
-
+      <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; background: #eee; padding: 0.5rem; border-radius: 8px; width: fit-content;">
+        <span style="font-size: 0.85rem; font-weight: bold; margin-right: 0.5rem; display: flex; align-items: center;">DRAW MODE:</span>
+        <button class="btn btn-secondary" [style.background]="drawingMode === 'video' ? 'var(--primary)' : ''" [style.color]="drawingMode === 'video' ? 'white' : ''" (click)="drawingMode = 'video'">📹 Video</button>
+        <button class="btn btn-secondary" [style.background]="drawingMode === 'home' ? '#10B981' : ''" [style.color]="drawingMode === 'home' ? 'white' : ''" (click)="drawingMode = 'home'">⌂ Home Link</button>
+        <button class="btn btn-secondary" [style.background]="drawingMode === 'nav' ? '#F59E0B' : ''" [style.color]="drawingMode === 'nav' ? 'white' : ''" (click)="drawingMode = 'nav'">🔗 Slide Link</button>
+        <button class="btn btn-secondary" [style.background]="drawingMode === 'menu' ? '#8B5CF6' : ''" [style.color]="drawingMode === 'menu' ? 'white' : ''" (click)="drawingMode = 'menu'">☰ Menu Popup</button>
+      </div>
       <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem;">
         <div *ngFor="let page of pages; let i = index" style="border: 1px solid var(--border); border-radius: 8px; padding: 1rem; background: var(--bg);">
           <div style="font-weight: 600; margin-bottom: 0.5rem; color: var(--text-muted);">Slide {{ i + 1 }}</div>
           
-          <div style="width: 100%; aspect-ratio: 4/3; background: #E5E7EB; border-radius: 6px; margin-bottom: 1rem; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative; user-select: none;"
+          <div class="card-image thumbnail-canvas-container" style="width: 100%; aspect-ratio: 4/3; background: #E5E7EB; border-radius: 6px; margin-bottom: 1rem; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative; user-select: none; cursor: crosshair;"
                (mousedown)="onMouseDown($event, page)" 
                (mousemove)="onMouseMove($event, page)" 
                (mouseup)="onMouseUp(page)" 
-               (mouseleave)="onMouseUp(page)"
-               [style.cursor]="page.video_name ? 'crosshair' : 'default'">
+               (mouseleave)="onMouseUp(page)">
                
             <img *ngIf="page.image_name" [src]="API_BASE + '/storage/' + projectId + '/images/' + page.image_name" style="max-width: 100%; max-height: 100%; object-fit: contain; pointer-events: none;" alt="Slide preview" onerror="this.style.display='none'"/>
             <span *ngIf="!page.image_name" style="color: var(--text-muted); pointer-events: none;">No Preview / HTML Native</span>
@@ -63,6 +68,17 @@
                  [style.left.%]="page.video_left" 
                  [style.width.%]="page.video_width" 
                  [style.height.%]="page.video_height">
+            </div>
+
+            <!-- Render Hotspots -->
+            <div *ngFor="let h of page.hotspots" 
+                 style="position: absolute; pointer-events: none; z-index: 11; border-radius: 2px;"
+                 [style.border]="'2px solid ' + (h.type === 'home' ? '#10B981' : h.type === 'nav' ? '#F59E0B' : '#8B5CF6')"
+                 [style.background]="(h.type === 'home' ? 'rgba(16, 185, 129, 0.2)' : h.type === 'nav' ? 'rgba(245, 158, 11, 0.2)' : 'rgba(139, 92, 246, 0.2)')"
+                 [style.top.%]="h.top" 
+                 [style.left.%]="h.left" 
+                 [style.width.%]="h.width" 
+                 [style.height.%]="h.height">
             </div>
             
             <!-- Contextual Help popup overlay -->
@@ -77,12 +93,14 @@
             * Rule enforced: Landing page must be index.html
           </div>
           
-          <label style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem; margin-top: 1rem;">Attached Media (Video)</label>
-          <div *ngIf="page.video_name" style="margin-bottom: 0.5rem; color: var(--primary); font-size: 0.875rem; font-weight: 600;">
-            ✓ {{ page.video_name }} attached
+          <div class="media-upload-area">
+            <label style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem; margin-top: 1rem;">Attached Media (Video)</label>
+            <div *ngIf="page.video_name" style="margin-bottom: 0.5rem; color: var(--primary); font-size: 0.875rem; font-weight: 600;">
+              ✓ {{ page.video_name }} attached
+            </div>
+            <input type="file" style="font-size: 0.8rem;" accept="video/mp4,video/webm" (change)="uploadSlideMedia($event, page)">
+            <div *ngIf="page.isUploadingMedia" style="font-size: 0.75rem; color: var(--secondary); margin-top: 0.25rem;">Uploading video...</div>
           </div>
-          <input type="file" style="font-size: 0.8rem;" accept="video/mp4,video/webm" (change)="uploadSlideMedia($event, page)">
-          <div *ngIf="page.isUploadingMedia" style="font-size: 0.75rem; color: var(--secondary); margin-top: 0.25rem;">Uploading video...</div>
           
           <div *ngIf="page.video_name" style="margin-top: 1rem; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px; background: #f9fafb;">
             <div style="font-size: 0.8rem; margin-bottom: 0.5rem; font-weight: bold; color: var(--text-main);">Video Position (%)</div>
@@ -93,9 +111,45 @@
               <div>Height:<br><input type="number" [(ngModel)]="page.video_height" style="width:100%; padding: 0.25rem; border-radius: 4px; border: 1px solid var(--border);" placeholder="Height %"></div>
             </div>
             
-            <button class="btn btn-secondary" style="width: 100%; margin-top: 1rem; padding: 0.5rem; font-size: 0.8rem; border-color: var(--primary); color: var(--primary);" (click)="openModal(page)">
-              🔍 Maximize & Edit Position
+            <button class="btn btn-secondary maximize-btn" style="width: 100%; margin-top: 1rem; padding: 0.5rem; font-size: 0.8rem; border-color: var(--primary); color: var(--primary);" (click)="openModal(page)">
+              🔍 Maximize & Manage Hotspots
             </button>
+          </div>
+
+          <!-- Hotspots Management List -->
+          <div *ngIf="page.hotspots.length > 0" style="margin-top: 1.5rem; border-top: 1px solid var(--border); padding-top: 1rem;">
+            <div style="font-weight: bold; font-size: 0.85rem; margin-bottom: 0.5rem;">Active Interaction Regions:</div>
+            <div *ngFor="let h of page.hotspots; let hi = index" style="background: white; border: 1px solid #eee; border-radius: 6px; padding: 0.75rem; margin-bottom: 0.75rem; font-size: 0.8rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <span [style.color]="h.type === 'home' ? '#10B981' : h.type === 'nav' ? '#F59E0B' : '#8B5CF6'" style="font-weight: 600;">
+                  {{ h.type === 'home' ? '⌂ Home Link' : h.type === 'nav' ? '🔗 Slide Link' : '☰ Menu Popup' }}
+                </span>
+                <button (click)="deleteHotspot(page, h)" style="background: none; border: none; color: #EF4444; cursor: pointer; font-size: 0.75rem;">Delete</button>
+              </div>
+
+              <!-- Slide Link Settings -->
+              <div *ngIf="h.type === 'nav'">
+                <label style="display: block; margin-bottom: 0.25rem;">Navigate to Slide:</label>
+                <select [(ngModel)]="h.target" style="width: 100%; padding: 0.25rem;">
+                  <option value="">-- Select Slide --</option>
+                  <option *ngFor="let p of pages" [value]="p.new_html_name">{{ p.new_html_name }}</option>
+                </select>
+              </div>
+
+              <!-- Menu Link Settings -->
+              <div *ngIf="h.type === 'menu'">
+                <div style="font-weight: 600; margin-top: 0.5rem;">Menu Items:</div>
+                <div *ngFor="let item of h.menuItems; let itemIdx = index" style="display: flex; gap: 0.25rem; margin-bottom: 0.25rem;">
+                  <input type="text" [(ngModel)]="item.label" placeholder="Label" style="flex: 1; font-size: 0.75rem;">
+                  <select [(ngModel)]="item.target" style="flex: 1; font-size: 0.75rem;">
+                    <option value="">-- Target --</option>
+                    <option *ngFor="let p of pages" [value]="p.new_html_name">{{ p.new_html_name }}</option>
+                  </select>
+                  <button (click)="removeMenuItem(h, itemIdx)" style="color: #EF4444; background: none; border: none; cursor: pointer;">×</button>
+                </div>
+                <button class="btn btn-secondary" style="width: 100%; font-size: 0.7rem; padding: 0.25rem; margin-top: 0.25rem;" (click)="addMenuItem(h)">+ Add Item</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -107,7 +161,7 @@
         All HTML rules and parameters will be automatically applied to the generated ZIP.
       </p>
       
-      <div style="display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; margin-bottom: 2rem; text-align: left;">
+      <div id="global-settings" style="display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; margin-bottom: 2rem; text-align: left;">
         <div>
           <label style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.4rem; color: var(--text-muted);">⬅ ➡ Arrow Buttons Position</label>
           <select [(ngModel)]="navArrowsPosition" style="padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); font-size: 0.9rem; cursor: pointer;">
@@ -119,6 +173,7 @@
         <div>
           <label style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.4rem; color: var(--text-muted);">⌂ Home Button Position</label>
           <select [(ngModel)]="homePosition" style="padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); font-size: 0.9rem; cursor: pointer;">
+            <option value="none">None (Hide Global Home)</option>
             <option value="top-left">Top Left</option>
             <option value="top-right">Top Right</option>
           </select>
@@ -170,6 +225,17 @@
          [style.left.%]="activeModalPage.video_left" 
          [style.width.%]="activeModalPage.video_width" 
          [style.height.%]="activeModalPage.video_height">
+    </div>
+
+    <!-- Modal Hotspots -->
+    <div *ngFor="let h of activeModalPage.hotspots" 
+         style="position: absolute; pointer-events: none; z-index: 11; border-radius: 4px;"
+         [style.border]="'3px solid ' + (h.type === 'home' ? '#10B981' : h.type === 'nav' ? '#F59E0B' : '#8B5CF6')"
+         [style.background]="(h.type === 'home' ? 'rgba(16, 185, 129, 0.2)' : h.type === 'nav' ? 'rgba(245, 158, 11, 0.2)' : 'rgba(139, 92, 246, 0.2)')"
+         [style.top.%]="h.top" 
+         [style.left.%]="h.left" 
+         [style.width.%]="h.width" 
+         [style.height.%]="h.height">
     </div>
   </div>
   

@@ -84,18 +84,50 @@ def create_dummy_slide(title: str, text: str, dest_path: str):
         
     img.save(dest_path)
 
-def get_base_html(image_filename, prev_filename="", next_filename="", video_filename="", v_top=10, v_left=10, v_width=80, v_height=80):
+def get_base_html(image_filename, prev_filename="", next_filename="", video_filename="", v_top=10, v_left=10, v_width=80, v_height=80, hotspots=None, home_position='none'):
     prev_link = f'<a href="{prev_filename}" class="nav-btn nav-prev">&#10094;</a>' if prev_filename else ''
     next_link = f'<a href="{next_filename}" class="nav-btn nav-next">&#10095;</a>' if next_filename else ''
+    home_link = f'<a href="index.html" class="home-btn" style="{"display:none" if home_position == "none" else ""}"><span>&#8962; Home</span></a>'
     
     video_embed = ""
     if video_filename:
         video_embed = f"""
-            <div style="position: absolute; top: {v_top}%; left: {v_left}%; width: {v_width}%; height: {v_height}%; z-index: 50; display: flex; justify-content: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); border-radius: 12px; overflow: hidden; background: transparent;">
-                <video src="media/{video_filename}" controls autoplay loop playsinline style="width: 100%; height: 100%; object-fit: cover;"></video>
+            <div class="video-overlay" style="position: absolute; top: {v_top}%; left: {v_left}%; width: {v_width}%; height: {v_height}%; z-index: 50;">
+                <video src="media/{video_filename}" controls autoplay loop playsinline></video>
             </div>
         """
     
+    hotspot_html = ""
+    menu_overlays = ""
+    if hotspots:
+        for idx, h in enumerate(hotspots):
+            h_top, h_left, h_width, h_height = h.get('top', 0), h.get('left', 0), h.get('width', 0), h.get('height', 0)
+            h_type = h.get('type')
+            
+            common_style = f"position: absolute; top: {h_top}%; left: {h_left}%; width: {h_width}%; height: {h_height}%; z-index: 60;"
+            
+            if h_type == 'home':
+                hotspot_html += f'<a href="index.html" style="{common_style}"></a>'
+            elif h_type == 'nav':
+                target = h.get('target', '#')
+                hotspot_html += f'<a href="{target}" style="{common_style}"></a>'
+            elif h_type == 'menu':
+                menu_id = f"custom-menu-{idx}"
+                hotspot_html += f'<a href="javascript:void(0)" onclick="toggleMenu(\'{menu_id}\')" style="{common_style}"></a>'
+                
+                items_html = ""
+                for item in h.get('menuItems', []):
+                    items_html += f'<li><a href="{item.get("target", "#")}">{item.get("label", "Link")}</a></li>'
+                
+                menu_overlays += f"""
+                <div id="{menu_id}" class="popup-menu-overlay" onclick="toggleMenu('{menu_id}')">
+                    <div class="popup-menu-content" onclick="event.stopPropagation()">
+                        <ul>{items_html}</ul>
+                        <button class="close-menu" onclick="toggleMenu('{menu_id}')">Close</button>
+                    </div>
+                </div>
+                """
+
     return f"""<!DOCTYPE html>
 <html>
     <head>
@@ -105,15 +137,15 @@ def get_base_html(image_filename, prev_filename="", next_filename="", video_file
     </head>
     <body id="top">
         <main id="aspect-ratio-container" class="animate-fade">
-            <a href="index.html" class="home-btn">
-                <span>&#8962; Home</span>
-            </a>
+            {home_link}
             {prev_link}
             {next_link}
             <div id="slideCover">
                 <img class="slide-bg" src="images/{image_filename}" />
                 {video_embed}
+                {hotspot_html}
             </div>
+            {menu_overlays}
         </main>
         <script type="text/javascript" language="javascript" src="js/control.js"></script>
     </body>
@@ -255,22 +287,25 @@ async def generate_project(project_id: str, body: Dict[str, Any]):
     media_build_dir.mkdir(exist_ok=True)
     
     # Build nav arrow CSS (vertical position)
+    if home_position == "top":
+        home_y_css = "top: 2%;"
+        home_transform = ""
+    elif home_position == "middle":
+        home_y_css = "top: 50%;"
+        home_transform = "translateY(-50%)"
+    elif home_position == "bottom":
+        home_y_css = "bottom: 2%;"
+        home_transform = ""
+    else: # none
+        home_y_css = "display: none;"
+        home_transform = ""
+    
     _arrow_v_map = {
         'top':    'top: 2%; transform: none;',
         'middle': 'top: 50%; transform: translateY(-50%);',
         'bottom': 'bottom: 2%; transform: none;',
     }
     arrow_v = _arrow_v_map.get(nav_arrows_position, _arrow_v_map['bottom'])
-
-    # Home button: always anchored at top, but left or right side.
-    # If arrows are also at top, push home inward to avoid overlapping the arrow on the same corner.
-    home_side  = 'right' if home_position == 'top-right' else 'left'
-    # Offset = normal 2% when arrows not at top; push in ~80px when they are on the same corner
-    if nav_arrows_position == 'top':
-        home_offset = '85px'
-    else:
-        home_offset = '2%'
-    home_v = f'top: 2%; {home_side}: {home_offset}; transform: none;'
 
     # Add dummy/template CSS and JS files
     with open(css_dir / "style.css", "w") as f:
@@ -284,12 +319,92 @@ body, html {{ margin: 0; padding: 0; width: 100%; height: 100%; background: #000
 
 /* Navigation Buttons */
 .nav-btn, .home-btn {{
-    position: absolute; z-index: 999;
-    background: transparent; color: #fff; text-decoration: none;
-    text-shadow: 0 3px 8px rgba(0,0,0,0.8);
-    padding: 15px; display: flex; align-items: center; justify-content: center;
+    position: absolute;
+    {home_y_css}
+    z-index: 100;
+    text-decoration: none;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    background: transparent;
+    padding: 10px;
+    display: flex; align-items: center; justify-content: center;
     transition: transform 0.2s, opacity 0.2s;
 }}
+.home-btn:hover {{
+    opacity: 0.8;
+}}
+
+/* Video Overlay */
+.video-overlay {{
+    display: flex;
+    justify-content: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    border-radius: 12px;
+    overflow: hidden;
+    background: transparent;
+}}
+.video-overlay video {{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}}
+
+/* Popup Menu Styles */
+.popup-menu-overlay {{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(8px);
+    display: none;
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+}}
+.popup-menu-content {{
+    background: rgba(255, 255, 255, 0.95);
+    padding: 2rem;
+    border-radius: 20px;
+    width: 80%;
+    max-width: 400px;
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+}}
+.popup-menu-content ul {{
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1.5rem 0;
+}}
+.popup-menu-content li {{
+    margin-bottom: 0.75rem;
+}}
+.popup-menu-content a {{
+    display: block;
+    padding: 1rem;
+    background: #4F46E5;
+    color: white;
+    text-decoration: none;
+    border-radius: 12px;
+    text-align: center;
+    font-weight: 600;
+    transition: transform 0.2s;
+}}
+.popup-menu-content a:active {{
+    transform: scale(0.95);
+}}
+.close-menu {{
+    width: 100%;
+    padding: 0.75rem;
+    background: #E5E7EB;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}}
+
 .nav-btn:hover, .home-btn:hover {{ transform: scale(1.1); opacity: 0.8; }}
 
 .nav-prev {{ left: 2%; {arrow_v} font-size: 2.5rem; }}
@@ -306,7 +421,16 @@ body, html {{ margin: 0; padding: 0; width: 100%; height: 100%; background: #000
 }}
 """)
     with open(js_dir / "control.js", "w") as f:
-        f.write("// Control JS")
+        f.write("""
+function toggleMenu(id) {
+    var menu = document.getElementById(id);
+    if (menu.style.display === 'flex') {
+        menu.style.display = 'none';
+    } else {
+        menu.style.display = 'flex';
+    }
+}
+""")
     with open(js_dir / "jquery.min.js", "w") as f:
         f.write("// jQuery min")
         
@@ -343,14 +467,15 @@ body, html {{ margin: 0; padding: 0; width: 100%; height: 100%; background: #000
                 if src_video.exists():
                     shutil.copy(src_video, media_build_dir / video_name)
                     
-            # Grab dimensions dynamically from the frontend state payload
+            # Grab dimensions and interaction hotspots from the frontend state payload
             frontend_page = frontend_state_map.get(page['id'], {})
             v_top = frontend_page.get('video_top', 10)
             v_left = frontend_page.get('video_left', 10)
             v_width = frontend_page.get('video_width', 80)
             v_height = frontend_page.get('video_height', 80)
+            hotspots = frontend_page.get('hotspots', [])
 
-            html_content = get_base_html(image_name, prev_html_name, next_html_name, video_name, v_top, v_left, v_width, v_height)
+            html_content = get_base_html(image_name, prev_html_name, next_html_name, video_name, v_top, v_left, v_width, v_height, hotspots, home_y)
             
             with open(build_dir / new_html_name, "w") as f:
                 f.write(html_content)
