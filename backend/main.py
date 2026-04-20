@@ -326,8 +326,8 @@ async def upload_slide_media(project_id: str, slide_id: str, file: UploadFile = 
     for page in project['pages']:
         if page['id'] == slide_id:
             page['video_name'] = file.filename
-    save_db()
             break
+    save_db()
             
     return {"status": "success", "video_name": file.filename}
 
@@ -484,10 +484,10 @@ body, html {{ margin: 0; padding: 0; width: 100%; height: 100%; background: #000
 
 .nav-btn:hover, .home-btn:hover {{ transform: scale(1.1); opacity: 0.8; }}
 
-.nav-prev { left: 0; {arrow_v} }
-.nav-next { right: 0; {arrow_v} }
-.home-btn { {home_v} font-size: 1.5rem; font-weight: 500; }
-.nav-btn:not([style*="display: none"]) { font-size: 2.5rem; }
+.nav-prev {{ left: 0; {arrow_v} }}
+.nav-next {{ right: 0; {arrow_v} }}
+.home-btn {{ {home_v} font-size: 1.5rem; font-weight: 500; }}
+.nav-btn:not([style*="display: none"]) {{ font-size: 2.5rem; }}
 
 /* Transitions */
 @keyframes fadeInScale {{
