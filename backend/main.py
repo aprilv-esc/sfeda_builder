@@ -287,18 +287,23 @@ async def generate_project(project_id: str, body: Dict[str, Any]):
     media_build_dir.mkdir(exist_ok=True)
     
     # Build nav arrow CSS (vertical position)
-    if home_position == "top":
-        home_y_css = "top: 2%;"
-        home_transform = ""
-    elif home_position == "middle":
-        home_y_css = "top: 50%;"
+    # Parse home position
+    home_side = 'right' if 'right' in home_position else 'left'
+    
+    if 'top' in home_position:
+        home_y_val = "top: 2%;"
+        home_transform = "none"
+    elif 'middle' in home_position:
+        home_y_val = "top: 50%;"
         home_transform = "translateY(-50%)"
-    elif home_position == "bottom":
-        home_y_css = "bottom: 2%;"
-        home_transform = ""
+    elif 'bottom' in home_position:
+        home_y_val = "bottom: 2%;"
+        home_transform = "none"
     else: # none
-        home_y_css = "display: none;"
-        home_transform = ""
+        home_y_val = "display: none;"
+        home_transform = "none"
+    
+    home_v = f"{home_y_val} {home_side}: 2%; transform: {home_transform};"
     
     _arrow_v_map = {
         'top':    'top: 2%; transform: none;',
@@ -320,7 +325,7 @@ body, html {{ margin: 0; padding: 0; width: 100%; height: 100%; background: #000
 /* Navigation Buttons */
 .nav-btn, .home-btn {{
     position: absolute;
-    {home_y_css}
+    {home_v}
     z-index: 100;
     text-decoration: none;
     color: white;
