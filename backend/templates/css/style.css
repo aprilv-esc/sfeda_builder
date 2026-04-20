@@ -1,5 +1,15 @@
-/* Detailing Aid Styles - Restored Working Version April 16 */
-body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; font-family: -apple-system, sans-serif; }
+body, html { 
+    margin: 0; 
+    padding: 0; 
+    width: 100%; 
+    height: 100%; 
+    background: #000; 
+    overflow: hidden; 
+    font-family: -apple-system, sans-serif; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
 #aspect-ratio-container { 
     position: relative; 
@@ -8,7 +18,7 @@ body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000;
     display: flex; 
     align-items: center; 
     justify-content: center; 
-    background: #fff; /* Working version used white background */
+    background: #000; /* Changed from white to black for professional look */
 }
 
 #slideCover { 
