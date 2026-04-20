@@ -100,11 +100,26 @@ async def global_exception_handler(request, exc):
         headers={"Access-Control-Allow-Origin": "*"}
     )
 
+def save_db():
+    try:
+        # Convert Path objects to strings for JSON serialization
+        serializable_db = {}
+        for pid, data in projects_db.items():
+            serializable_db[pid] = data.copy()
+            if 'pages' in serializable_db[pid]:
+                # Deep copy to avoid mutating the original
+                serializable_db[pid]['pages'] = json.loads(json.dumps(data['pages']))
+        
+        with open(DB_FILE, "w") as f:
+            json.dump(serializable_db, f, indent=4)
+    except Exception as e:
+        print(f"Error saving DB: {e}")
+
 @app.get("/")
 def read_root():
     return {
         "status": "ok", 
-        "version": "1.0.6-resilient-v3", 
+        "version": "1.0.6-resilient-v3.1", 
         "message": "DA Converter API is running with SFE compliance."
     }
 
