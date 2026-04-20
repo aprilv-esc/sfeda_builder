@@ -13,7 +13,7 @@ from PIL import Image, ImageDraw, ImageFont
 from typing import List, Dict, Any
 
 # Importers
-import fitz  # PyMuPDF
+# Removed top-level fitz import to prevent startup crashes. It is now imported on-demand inside functions.
 from bs4 import BeautifulSoup
 
 app = FastAPI(title="Detailing Aid Converter API")
@@ -299,6 +299,7 @@ def get_base_html(image_filename, prev_filename="", next_filename="", video_file
 
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
+    import fitz # Lazy import to prevent startup crash
     print(f"DEBUG: Starting upload for file: {file.filename}")
     try:
         project_id = str(uuid.uuid4())
