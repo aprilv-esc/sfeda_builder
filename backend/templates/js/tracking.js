@@ -132,8 +132,5 @@ function track() {
     setTimeout(track, 250);
 }
 
-document.addEventListener('DOMContentLoaded', track, false);
-
-window.onload = function() {    
-    save(window.location.pathname.split('/').pop(), 'open');
-};
+/* SFE RULE 11: Call track directly instead of using DOMContentLoaded or window.onload */
+track();

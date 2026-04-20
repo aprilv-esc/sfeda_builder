@@ -249,8 +249,12 @@ def get_base_html(image_filename, prev_filename="", next_filename="", video_file
 <html>
     <head>
         <title>Detailing Aid Slide</title>
-        <script type="text/javascript" language="javascript" src="./js/jquery.min.js"></script>
-        <link rel="stylesheet" type="text/css" href="./css/style.css" />
+        <style>
+[[STYLE]]
+        </style>
+        <script type="text/javascript">
+[[JQUERY]]
+        </script>
         <script type="text/javascript">
 [[TRACKING_SCRIPT]]
         </script>
@@ -263,14 +267,20 @@ def get_base_html(image_filename, prev_filename="", next_filename="", video_file
                     [[VIDEO_EMBED]]
                     [[HOTSPOT_HTML]]
                 </div>
+                <div class="sfe-safe-zone"></div>
             </div>
             [[MENU_OVERLAYS]]
         </div>
-        <script type="text/javascript" language="javascript" src="./js/control.js"></script>
+        <script type="text/javascript">
+[[CONTROL]]
+        </script>
     </body>
 </html>"""
 
-    html = html_template.replace("[[TRACKING_SCRIPT]]", SFE_TRACKING)
+    html = html_template.replace("[[STYLE]]", SFE_STYLE)
+    html = html.replace("[[JQUERY]]", SFE_JQUERY)
+    html = html.replace("[[TRACKING_SCRIPT]]", SFE_TRACKING)
+    html = html.replace("[[CONTROL]]", SFE_CONTROL)
     html = html.replace("[[IMAGE]]", image_filename)
     html = html.replace("[[NEXT]]", next_filename if next_filename else "")
     html = html.replace("[[PREV]]", prev_filename if prev_filename else "")
@@ -433,10 +443,6 @@ async def generate_project(project_id: str, body: Dict[str, Any]):
         build_dir.mkdir(exist_ok=True)
         images_build_dir = build_dir / "images"
         images_build_dir.mkdir(exist_ok=True)
-        css_dir = build_dir / "css"
-        css_dir.mkdir(exist_ok=True)
-        js_dir = build_dir / "js"
-        js_dir.mkdir(exist_ok=True)
         media_build_dir = build_dir / "media"
         media_build_dir.mkdir(exist_ok=True)
             # Build nav arrow CSS (vertical position)
@@ -467,13 +473,7 @@ async def generate_project(project_id: str, body: Dict[str, Any]):
         }
         arrow_v = _arrow_v_map.get(nav_arrows_position, _arrow_v_map['bottom'])
 
-        # Add SFE-compliant CSS and JS files
-        with open(css_dir / "style.css", "w", encoding='utf-8', errors='replace') as f:
-            f.write(SFE_STYLE)
-        with open(js_dir / "control.js", "w", encoding='utf-8', errors='replace') as f:
-            f.write(SFE_CONTROL)
-        with open(js_dir / "jquery.min.js", "w", encoding='utf-8', errors='replace') as f:
-            f.write(SFE_JQUERY)
+        # Added CamelCase naming enforcement and removed separate JS/CSS folder creation
             
         project_type = project.get('type', '').lower()
         if project_type in ['pdf']:

@@ -1,16 +1,14 @@
 var tStart,tEnd;
-$(document).ready(function(){
+function init() {
     setDimensions();
     maintainAspectRatio();
     slideHandlers();
-    console.log("Game Controler Initialized");
-    $("#slideCover").fadeIn(1000,function(){
-        setTimeout(function(){
-            $("#slideVid").fadeIn(1000);
-            showVid();
-        },500)
-    })
-})
+    showVid();
+    console.log("Game Controller Initialized");
+}
+
+/* SFE RULE 11: Call init directly at the end of script instead of using onload/ready events */
+init();
 
 function slideHandlers(){
     $("#slideCover img,#slideCover video").on("touchstart",function(e){
