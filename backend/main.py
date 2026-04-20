@@ -12,15 +12,13 @@ import re
 from PIL import Image, ImageDraw, ImageFont
 from typing import List, Dict, Any
 
-# Importers
-import fitz  # PyMuPDF
-from bs4 import BeautifulSoup
+# HEAVY IMPORTS MOVED TO FUNCTIONS FOR STARTUP STABILITY
 
 app = FastAPI(title="Detailing Aid Converter API")
 
+# CORS MUST BE FIRST
 app.add_middleware(
     CORSMiddleware,
-    # Most permissive configuration to avoid CORS issues on error responses
     allow_origins=["*"],
     allow_credentials=False, 
     allow_methods=["*"],
@@ -47,33 +45,43 @@ STORAGE_DIR.mkdir(parents=True, exist_ok=True)
 DB_FILE = STORAGE_DIR / "projects.json"
 TEMPLATES_DIR = Path(__file__).parent / "templates"
 
-# Load SFE Templates
+# Lazy template holders
+SFE_STYLE = None
+SFE_CONTROL = None
+SFE_JQUERY = None
+SFE_TRACKING = None
+
 def load_template(path, default=""):
     t_path = TEMPLATES_DIR / path
     if t_path.exists():
-        with open(t_path, "r", encoding="utf-8", errors="replace") as f:
-            content = f.read()
-            print(f"DEBUG: Loaded template {path} ({len(content)} bytes)")
-            return content
-    print(f"WARNING: Template {path} not found at {t_path}")
+        try:
+            with open(t_path, "r", encoding="utf-8", errors="replace") as f:
+                content = f.read()
+                print(f"DEBUG: Loaded template {path} ({len(content)} bytes)")
+                return content
+        except Exception:
+            pass
+    print(f"WARNING: Template {path} not found.")
     return default
 
-# Load SFE Templates with safety
-try:
-    SFE_STYLE = load_template("css/style.css")
-    SFE_CONTROL = load_template("js/control.js")
-    SFE_JQUERY = load_template("js/jquery.min.js")
-    SFE_TRACKING = load_template("js/tracking.js")
-except Exception as e:
-    print(f"CRITICAL: Failed to load core SFE templates: {e}")
-    SFE_STYLE = SFE_CONTROL = SFE_JQUERY = SFE_TRACKING = ""
+def ensure_templates():
+    global SFE_STYLE, SFE_CONTROL, SFE_JQUERY, SFE_TRACKING
+    if SFE_STYLE is None:
+        SFE_STYLE = load_template("css/style.css")
+        SFE_CONTROL = load_template("js/control.js")
+        SFE_JQUERY = load_template("js/jquery.min.js")
+        SFE_TRACKING = load_template("js/tracking.js")
 
-# Mount the storage directory so we can serve generated images
+# Mount the storage directory
 app.mount("/storage", StaticFiles(directory=STORAGE_DIR), name="storage")
 
 @app.get("/")
 def read_root():
-    return {"status": "ok", "message": "DA Converter API is running."}
+    return {
+        "status": "ok", 
+        "version": "1.0.5-resilient", 
+        "message": "DA Converter API is running with SFE compliance."
+    }
 
 # DB Persistence
 projects_db = {}
@@ -284,6 +292,7 @@ def get_base_html(image_filename, prev_filename="", next_filename="", video_file
     </body>
 </html>"""
 
+    ensure_templates()
     html = html_template.replace("[[STYLE]]", SFE_STYLE)
     html = html.replace("[[JQUERY]]", SFE_JQUERY)
     html = html.replace("[[TRACKING_SCRIPT]]", SFE_TRACKING)
@@ -299,6 +308,8 @@ def get_base_html(image_filename, prev_filename="", next_filename="", video_file
 
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
+    import fitz
+    ensure_templates()
     print(f"DEBUG: Starting upload for file: {file.filename}")
     try:
         project_id = str(uuid.uuid4())
@@ -345,6 +356,7 @@ async def upload_file(file: UploadFile = File(...)):
             )
 
         elif file.filename.lower().endswith(".zip"):
+            from bs4 import BeautifulSoup
             # Sanitize HTML logic
             with zipfile.ZipFile(file_path, "r") as zip_ref:
                 zip_ref.extractall(project_dir / "extracted")
@@ -428,6 +440,8 @@ async def upload_slide_media(project_id: str, slide_id: str, file: UploadFile = 
 
 @app.post("/generate/{project_id}")
 async def generate_project(project_id: str, body: Dict[str, Any]):
+    from bs4 import BeautifulSoup
+    ensure_templates()
     new_pages = body.get('pages', [])
     nav_arrows_position = body.get('nav_arrows_position', 'bottom')
     home_position = body.get('home_position', 'top')
