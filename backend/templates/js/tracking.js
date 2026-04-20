@@ -55,25 +55,10 @@ function setValue(name, value) {
 }
 
 function save(file, eventName) {
-    var request = new XMLHttpRequest()
-    request.open('GET', 'https://updjhuxtmi.execute-api.ap-southeast-1.amazonaws.com/v1', true)
-    request.onload = function () {
-        var body = JSON.parse(this.response);
-        var date = new Date(body.timestamp);
-        if (isNaN(date)) {
-            date = new Date(body.webkit);
-        }
-        if (isNaN(date)) {
-            saveData(file, eventName, getCurrentDate());
-        } else {
-            date.setHours(date.getHours() + 8);
-            saveData(file, eventName, formatDate(date));
-        }
-    }
-    request.onerror = function() {
-        saveData(file, eventName, getCurrentDate());
-    }
-    request.send()
+    /* SFE RULE 10: No internet connection allowed. 
+       Removing XMLHttpRequest to AWS and generating timestamp locally. */
+    var localDate = getCurrentDate();
+    saveData(file, eventName, localDate);
 }
 
 function saveData(file, eventName, date) {

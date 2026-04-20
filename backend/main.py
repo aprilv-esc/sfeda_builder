@@ -253,6 +253,10 @@ def get_base_html(image_filename, prev_filename="", next_filename="", video_file
 [[STYLE]]
         </style>
         <script type="text/javascript">
+            // SFE DIAGNOSTIC: Show error if script fails
+            window.onerror = function(msg, url, line) {
+                alert("SFE Error: " + msg + " at " + url + ":" + line);
+            };
 [[JQUERY]]
         </script>
         <script type="text/javascript">
