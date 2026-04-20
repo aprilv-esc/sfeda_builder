@@ -143,6 +143,28 @@ async def get_project(project_id: str):
         raise HTTPException(status_code=404, detail="Project not found")
     return projects_db[project_id]
 
+@app.put("/project/{project_id}")
+async def update_project(project_id: str, payload: Dict[str, Any]):
+    print(f"DEBUG: Update requested for {project_id}")
+    if project_id not in projects_db:
+        # Check if it's in the persisted file
+        if DB_FILE.exists():
+            with open(DB_FILE, "r") as f:
+                temp_db = json.load(f)
+                if project_id in temp_db:
+                    projects_db[project_id] = temp_db[project_id]
+        
+        if project_id not in projects_db:
+            raise HTTPException(status_code=404, detail="Project not found")
+    
+    # Merge payload defensively
+    project = projects_db[project_id]
+    for key, value in payload.items():
+        project[key] = value
+        
+    save_db()
+    return {"status": "ok", "project": project}
+
 @app.delete("/project/{project_id}")
 async def delete_project(project_id: str):
     if project_id in projects_db:
