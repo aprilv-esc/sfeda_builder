@@ -288,15 +288,16 @@ async def generate_project(project_id: str, body: Dict[str, Any]):
     
     # Build nav arrow CSS (vertical position)
     # Parse home position
-    home_side = 'right' if 'right' in home_position else 'left'
+    home_pos_str = str(home_position or 'top-right').lower()
+    home_side = 'right' if 'right' in home_pos_str else 'left'
     
-    if 'top' in home_position:
+    if 'top' in home_pos_str:
         home_y_val = "top: 2%;"
         home_transform = "none"
-    elif 'middle' in home_position:
+    elif 'middle' in home_pos_str:
         home_y_val = "top: 50%;"
         home_transform = "translateY(-50%)"
-    elif 'bottom' in home_position:
+    elif 'bottom' in home_pos_str:
         home_y_val = "bottom: 2%;"
         home_transform = "none"
     else: # none
@@ -440,7 +441,8 @@ function toggleMenu(id) {
     with open(js_dir / "jquery.min.js", "w") as f:
         f.write("// jQuery min")
         
-    if project['type'] in ['pdf']:
+    project_type = project.get('type', '').lower()
+    if project_type in ['pdf']:
         # Rename logic and building HTML
         # Convert new_pages list to a map dict
         rename_map = {p['id']: p.get('new_html_name', p.get('html_name')) for p in new_pages}
@@ -481,18 +483,18 @@ function toggleMenu(id) {
             v_height = frontend_page.get('video_height', 80)
             hotspots = frontend_page.get('hotspots', [])
 
-            html_content = get_base_html(image_name, prev_html_name, next_html_name, video_name, v_top, v_left, v_width, v_height, hotspots, home_y)
+            html_content = get_base_html(image_name, prev_html_name, next_html_name, video_name, v_top, v_left, v_width, v_height, hotspots, home_position)
             
             with open(build_dir / new_html_name, "w") as f:
                 f.write(html_content)
                 
-    elif project['type'] in ['zip']:
+    elif project_type in ['zip']:
         # For ZIP, rename files in the extracted directory
         # This is a bit more complex (refs need rewriting).
         # We will just copy the extracted items and rename the requested files.
         extracted_dir = project_dir / "extracted"
         shutil.copytree(extracted_dir, build_dir, dirs_exist_ok=True)
-        rename_map = {p['id']: p['new_html_name'] for p in new_pages}
+        rename_map = {p['id']: p.get('new_html_name', p.get('html_name')) for p in new_pages}
         
         for root, dirs, files in os.walk(build_dir):
             for name in files:

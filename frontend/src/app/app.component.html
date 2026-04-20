@@ -127,7 +127,7 @@
                   {{ h.type === 'home' ? '⌂ Home Link' : h.type === 'nav' ? '🔗 Slide Link' : '☰ Menu Popup' }}
                 </span>
                 <div style="display: flex; gap: 0.5rem;">
-                   <button (click)="replicateHotspot(h, 'all')" style="background: var(--primary); border: none; color: white; cursor: pointer; font-size: 0.75rem; padding: 2px 6px; border-radius: 4px;">Apply to All Slides</button>
+                   <button (click)="replicateHotspot(page.id, h, 'all')" style="background: var(--primary); border: none; color: white; cursor: pointer; font-size: 0.75rem; padding: 2px 6px; border-radius: 4px;">Apply to All Slides</button>
                    <button (click)="deleteHotspot(page, h)" style="background: none; border: none; color: #EF4444; cursor: pointer; font-size: 0.75rem;">Delete</button>
                 </div>
               </div>
@@ -138,9 +138,9 @@
                 <div style="padding: 0.5rem; background: #f3f4f6; border-radius: 4px; border: 1px solid #ddd; margin-top: 0.25rem;">
                   <div *ngFor="let p of pages" style="display: flex; align-items: center; gap: 0.25rem;">
                     <input type="checkbox" #slideCheck [id]="'check-'+hi+'-'+p.id" [disabled]="p.id === page.id">
-                    <label [for]="'check-'+hi+'-'+p.id">{{ p.new_html_name }}</label>
+                    <label [for]="'check-'+hi+'-'+p.id" style="cursor: pointer;">{{ p.new_html_name }}</label>
                   </div>
-                  <button (click)="replicateHotspot(h, getSelectedPageIds(hi))" class="btn btn-secondary" style="width: 100%; font-size: 0.75rem; padding: 2px; margin-top: 0.5rem; border-color: var(--primary); color: var(--primary);">
+                  <button (click)="replicateHotspot(page.id, h, getSelectedPageIds(hi))" class="btn btn-secondary" style="width: 100%; font-size: 0.75rem; padding: 2px; margin-top: 0.5rem; border-color: var(--primary); color: var(--primary);">
                     Apply to Selected
                   </button>
                   <p style="font-size: 0.65rem; color: #666; margin-top: 0.25rem;">* Note: This will sync the position to the target slides.</p>
