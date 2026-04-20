@@ -18,10 +18,6 @@ function slideHandlers(){
         tEnd=e.originalEvent.changedTouches[0].pageX
         swipeDirection();
     })
-    $("#slideCover img,#slideCover video").on("click",function(e){
-        toLeft();
-    })
-
 }
 
 function maintainAspectRatio(){

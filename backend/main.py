@@ -226,9 +226,11 @@ def get_base_html(image_filename, prev_filename="", next_filename="", video_file
             common_style = f"position: absolute; top: {h_top}%; left: {h_left}%; width: {h_width}%; height: {h_height}%; z-index: 60;"
             
             if h_type == 'home':
+                # SFE RULE 2: Landing page is index.html
                 hotspot_html += f'<a href="index.html" style="{common_style}"></a>'
             elif h_type == 'nav':
                 target = h.get('target', '#')
+                # If target is the ID of the first slide, ensure it points to index.html
                 hotspot_html += f'<a href="{target}" style="{common_style}"></a>'
             elif h_type == 'menu':
                 menu_id = f"custom-menu-{idx}"
@@ -515,9 +517,39 @@ async def generate_project(project_id: str, body: Dict[str, Any]):
                 v_left = frontend_page.get('video_left', 10)
                 v_width = frontend_page.get('video_width', 80)
                 v_height = frontend_page.get('video_height', 80)
-                hotspots = frontend_page.get('hotspots', [])
+                raw_hotspots = frontend_page.get('hotspots', [])
+                
+                # SFE COMPLIANCE: Rewrite hotspot targets using the rename_map
+                # This ensures that if a slide was renamed to "ProductBenefits.html",
+                # all links pointing to the old "slide_x.html" ID are updated.
+                processed_hotspots = []
+                # Find the ID of the first slide to ensure "Home" targets point to index.html
+                first_slide_id = project['pages'][0]['id'] if project['pages'] else None
+                
+                for h in raw_hotspots:
+                    h_copy = h.copy()
+                    target = h_copy.get('target', '')
+                    if target == first_slide_id:
+                        h_copy['target'] = "index.html"
+                    elif target in rename_map:
+                        h_copy['target'] = rename_map[target]
+                    
+                    # Also update targets inside menu items if it's a menu type
+                    if 'menuItems' in h_copy:
+                        new_menu_items = []
+                        for item in h_copy['menuItems']:
+                            item_copy = item.copy()
+                            i_target = item_copy.get('target', '')
+                            if i_target == first_slide_id:
+                                item_copy['target'] = "index.html"
+                            elif i_target in rename_map:
+                                item_copy['target'] = rename_map[i_target]
+                            new_menu_items.append(item_copy)
+                        h_copy['menuItems'] = new_menu_items
+                    
+                    processed_hotspots.append(h_copy)
 
-                html_content = get_base_html(image_name, prev_html_name, next_html_name, video_name, v_top, v_left, v_width, v_height, hotspots, home_position)
+                html_content = get_base_html(image_name, prev_html_name, next_html_name, video_name, v_top, v_left, v_width, v_height, processed_hotspots, home_position)
                 
                 with open(build_dir / new_html_name, "w") as f:
                     f.write(html_content)
