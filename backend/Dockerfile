@@ -17,4 +17,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Start the application using shell form to expand $PORT
-CMD uvicorn main:app --host 0.0.0.0 --port $PORT
+# We use 8080 as primary, but fallback to 80 if necessary for Railway ingress
+CMD uvicorn main:app --host 0.0.0.0 --port ${PORT:-8080}
