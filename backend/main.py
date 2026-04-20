@@ -61,6 +61,20 @@ def load_db():
         try:
             with open(DB_FILE, "r") as f:
                 projects_db = json.load(f)
+                # Sanitize: Ensure hotspots and required fields exist for all pages
+                for pid, data in projects_db.items():
+                    if 'pages' in data:
+                        for page in data['pages']:
+                            if 'hotspots' not in page:
+                                page['hotspots'] = []
+                            if 'video_top' not in page:
+                                page['video_top'] = 0
+                            if 'video_left' not in page:
+                                page['video_left'] = 0
+                            if 'video_width' not in page:
+                                page['video_width'] = 0
+                            if 'video_height' not in page:
+                                page['video_height'] = 0
         except Exception as e:
             print(f"Error loading DB: {e}")
             projects_db = {}

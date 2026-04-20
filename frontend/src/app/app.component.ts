@@ -60,13 +60,19 @@ export class AppComponent implements OnInit {
     this.http.get<any>(`${this.API_BASE}/project/${projectSummary.id}`).subscribe({
       next: (project) => {
         this.projectId = project.id;
+        // Defensive: ensure hotspots exist for all pages
+        if (project.pages) {
+          project.pages.forEach((p: any) => {
+            if (!p.hotspots) p.hotspots = [];
+          });
+        }
         this.pages = project.pages;
         this.navArrowsPosition = project.nav_arrows_position || 'none';
         this.homePosition = project.home_position || 'none';
         this.downloadUrl = null;
         // Scroll to management view
         setTimeout(() => {
-          document.querySelector('#step2-manage')?.scrollIntoView({ behavior: 'smooth' });
+          document.querySelector('#step2-rename')?.scrollIntoView({ behavior: 'smooth' });
         }, 100);
       },
       error: (err) => alert('Failed to load project details.')

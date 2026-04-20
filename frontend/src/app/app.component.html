@@ -142,7 +142,7 @@
           </button>
 
           <!-- Hotspots Management List -->
-          <div *ngIf="page.hotspots.length > 0" style="margin-top: 1.5rem; border-top: 1px solid var(--border); padding-top: 1rem;">
+          <div *ngIf="page.hotspots?.length > 0" style="margin-top: 1.5rem; border-top: 1px solid var(--border); padding-top: 1rem;">
             <div style="font-weight: bold; font-size: 0.85rem; margin-bottom: 0.5rem;">Active Interaction Regions:</div>
             <div *ngFor="let h of page.hotspots; let hi = index" style="background: white; border: 1px solid #eee; border-radius: 6px; padding: 0.75rem; margin-bottom: 0.75rem; font-size: 0.8rem;">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
@@ -244,62 +244,63 @@
       </div>
     </div> <!-- End Card 3 -->
   </div> <!-- End ProjectId -->
+</div> <!-- End Container -->
 
-  <!-- Modal -->
-  <div *ngIf="activeModalPage" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.95); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 1rem; backdrop-filter: blur(10px); color: white;">
-    
-    <!-- Header: Pinned to top -->
-    <div style="width: 100%; max-width: 95vw; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
-      <div style="display: flex; align-items: center; gap: 2rem;">
-        <span style="font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em;">PRECISION EDITOR</span>
-        <div style="display: flex; gap: 0.5rem; background: rgba(0,0,0,0.3); padding: 0.4rem; border-radius: 10px;">
-          <button class="btn btn-secondary" style="padding: 4px 12px; font-size: 0.85rem;" [style.background]="drawingMode === 'video' ? 'var(--primary)' : ''" (click)="drawingMode = 'video'">📹 Video</button>
-          <button class="btn btn-secondary" style="padding: 4px 12px; font-size: 0.85rem;" [style.background]="drawingMode === 'home' ? '#10B981' : ''" (click)="drawingMode = 'home'">⌂ Home</button>
-          <button class="btn btn-secondary" style="padding: 4px 12px; font-size: 0.85rem;" [style.background]="drawingMode === 'nav' ? '#F59E0B' : ''" (click)="drawingMode = 'nav'">🔗 Slide</button>
-          <button class="btn btn-secondary" style="padding: 4px 12px; font-size: 0.85rem;" [style.background]="drawingMode === 'menu' ? '#8B5CF6' : ''" (click)="drawingMode = 'menu'">☰ Menu</button>
-        </div>
+<!-- Modal: Root-Level Mounting to prevent Clipping -->
+<div *ngIf="activeModalPage" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.95); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 1rem; backdrop-filter: blur(10px); color: white;">
+  
+  <!-- Header: Pinned to top -->
+  <div style="width: 100%; max-width: 95vw; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+    <div style="display: flex; align-items: center; gap: 2rem;">
+      <span style="font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em;">PRECISION EDITOR</span>
+      <div style="display: flex; gap: 0.5rem; background: rgba(0,0,0,0.3); padding: 0.4rem; border-radius: 10px;">
+        <button class="btn btn-secondary" style="padding: 4px 12px; font-size: 0.85rem;" [style.background]="drawingMode === 'video' ? 'var(--primary)' : ''" (click)="drawingMode = 'video'">📹 Video</button>
+        <button class="btn btn-secondary" style="padding: 4px 12px; font-size: 0.85rem;" [style.background]="drawingMode === 'home' ? '#10B981' : ''" (click)="drawingMode = 'home'">⌂ Home</button>
+        <button class="btn btn-secondary" style="padding: 4px 12px; font-size: 0.85rem;" [style.background]="drawingMode === 'nav' ? '#F59E0B' : ''" (click)="drawingMode = 'nav'">🔗 Slide</button>
+        <button class="btn btn-secondary" style="padding: 4px 12px; font-size: 0.85rem;" [style.background]="drawingMode === 'menu' ? '#8B5CF6' : ''" (click)="drawingMode = 'menu'">☰ Menu</button>
       </div>
-      <button class="btn btn-primary" style="background: #fff; color: #000; padding: 0.8rem 2.5rem; border-radius: 8px; font-weight: 700; font-size: 1rem;" (click)="closeModal()">Done & Save</button>
     </div>
+    <button class="btn btn-primary" style="background: #fff; color: #000; padding: 0.8rem 2.5rem; border-radius: 8px; font-weight: 700; font-size: 1rem;" (click)="closeModal()">Done & Save</button>
+  </div>
 
-    <!-- Instructions -->
-    <div style="margin-bottom: 1rem; font-size: 0.9rem; color: #bbb; display: flex; gap: 1.5rem;">
-      <span>👆 <strong>Click and Drag</strong> on the image to draw interactive boxes.</span>
-      <span>🖱️ <strong>Precision:</strong> High-precision math instantly applied.</span>
-    </div>
+  <!-- Instructions -->
+  <div style="margin-bottom: 1rem; font-size: 0.9rem; color: #bbb; display: flex; gap: 1.5rem;">
+    <span>👆 <strong>Click and Drag</strong> on the image to draw interactive boxes.</span>
+    <span>🖱️ <strong>Precision:</strong> High-precision math instantly applied.</span>
+  </div>
 
-    <!-- Drawing Canvas: Guaranteed to fit -->
-    <div style="flex: 1; width: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #000; border-radius: 12px;">
-      <div class="thumbnail-canvas-container" 
-           style="position: relative; display: inline-block; cursor: crosshair; user-select: none; box-shadow: 0 0 40px rgba(0,0,0,0.5);"
-           (mousedown)="onMouseDown($event, activeModalPage)" 
-           (mousemove)="onMouseMove($event, activeModalPage)" 
-           (mouseup)="onMouseUp(activeModalPage)" 
-           (mouseleave)="onMouseUp(activeModalPage)">
-        
-        <!-- The Image itself determines the container size precisely -->
-        <img [src]="API_BASE + '/storage/' + projectId + '/images/' + activeModalPage.image_name" 
-             style="display: block; max-height: 75vh; max-width: 95vw; object-fit: contain; pointer-events: none;" />
+  <!-- Drawing Canvas: Guaranteed to fit -->
+  <div style="flex: 1; width: 100%; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #000; border-radius: 12px;">
+    <div class="thumbnail-canvas-container" 
+         style="position: relative; display: inline-block; cursor: crosshair; user-select: none; box-shadow: 0 0 40px rgba(0,0,0,0.5);"
+         (mousedown)="onMouseDown($event, activeModalPage)" 
+         (mousemove)="onMouseMove($event, activeModalPage)" 
+         (mouseup)="onMouseUp(activeModalPage)" 
+         (mouseleave)="onMouseUp(activeModalPage)">
+      
+      <!-- The Image itself determines the container size precisely -->
+      <img [src]="API_BASE + '/storage/' + projectId + '/images/' + activeModalPage.image_name" 
+           style="display: block; max-height: 75vh; max-width: 95vw; object-fit: contain; pointer-events: none;" />
 
-        <!-- Video Box Overlay -->
-        <div *ngIf="activeModalPage.video_name" 
-             style="position: absolute; border: 3px dashed rgba(79, 70, 229, 0.9); background: rgba(79, 70, 229, 0.2); pointer-events: none; z-index: 10;"
-             [style.top.%]="activeModalPage.video_top" 
-             [style.left.%]="activeModalPage.video_left" 
-             [style.width.%]="activeModalPage.video_width" 
-             [style.height.%]="activeModalPage.video_height">
-        </div>
+      <!-- Video Box Overlay -->
+      <div *ngIf="activeModalPage.video_name" 
+           style="position: absolute; border: 3px dashed rgba(79, 70, 229, 0.9); background: rgba(79, 70, 229, 0.2); pointer-events: none; z-index: 10;"
+           [style.top.%]="activeModalPage.video_top" 
+           [style.left.%]="activeModalPage.video_left" 
+           [style.width.%]="activeModalPage.video_width" 
+           [style.height.%]="activeModalPage.video_height">
+      </div>
 
-        <!-- Hotspots Overlay -->
-        <div *ngFor="let h of activeModalPage.hotspots" 
-             style="position: absolute; border: 3px solid; pointer-events: none; z-index: 11; display: flex; align-items: flex-start; justify-content: flex-end;"
-             [style.border-color]="h.type === 'home' ? '#10B981' : h.type === 'nav' ? '#F59E0B' : '#8B5CF6'"
-             [style.background]="h.type === 'home' ? 'rgba(16, 185, 129, 0.2)' : h.type === 'nav' ? 'rgba(245, 158, 11, 0.2)' : 'rgba(139, 92, 246, 0.2)'"
-             [style.top.%]="h.top" 
-             [style.left.%]="h.left" 
-             [style.width.%]="h.width" 
-             [style.height.%]="h.height">
-        </div>
+      <!-- Hotspots Overlay -->
+      <div *ngFor="let h of activeModalPage.hotspots" 
+           style="position: absolute; border: 3px solid; pointer-events: none; z-index: 11; display: flex; align-items: flex-start; justify-content: flex-end;"
+           [style.border-color]="h.type === 'home' ? '#10B981' : h.type === 'nav' ? '#F59E0B' : '#8B5CF6'"
+           [style.background]="h.type === 'home' ? 'rgba(16, 185, 129, 0.2)' : h.type === 'nav' ? 'rgba(245, 158, 11, 0.2)' : 'rgba(139, 92, 246, 0.2)'"
+           [style.top.%]="h.top" 
+           [style.left.%]="h.left" 
+           [style.width.%]="h.width" 
+           [style.height.%]="h.height">
       </div>
     </div>
   </div>
+</div>
