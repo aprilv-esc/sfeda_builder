@@ -259,6 +259,9 @@
         <button class="btn btn-secondary" style="padding: 4px 12px; font-size: 0.85rem;" [style.background]="drawingMode === 'nav' ? '#F59E0B' : ''" (click)="drawingMode = 'nav'">🔗 Slide</button>
         <button class="btn btn-secondary" style="padding: 4px 12px; font-size: 0.85rem;" [style.background]="drawingMode === 'menu' ? '#8B5CF6' : ''" (click)="drawingMode = 'menu'">☰ Menu</button>
       </div>
+      <button class="btn" style="background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); font-size: 0.75rem; padding: 4px 12px;" (click)="activeModalPage.hotspots = []; activeModalPage.video_width = 0; activeModalPage.video_height = 0;">
+        🗑️ Clear Page Data
+      </button>
     </div>
     <button class="btn btn-primary" style="background: #fff; color: #000; padding: 0.8rem 2.5rem; border-radius: 8px; font-weight: 700; font-size: 1rem;" (click)="closeModal()">Done & Save</button>
   </div>
