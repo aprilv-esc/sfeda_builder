@@ -203,11 +203,14 @@ export class AppComponent implements OnInit {
     
     this.http.post<any>(`${this.API_BASE}/generate/${this.projectId}`, payload).subscribe({
       next: (res) => {
-        this.downloadUrl = `${this.API_BASE}${res.download_url}`;
+        // Ensure download URL is absolute
+        this.downloadUrl = res.download_url.startsWith('http') ? res.download_url : `${this.API_BASE}${res.download_url}`;
         this.isGenerating = false;
       },
       error: (err) => {
-        alert('Generation failed');
+        console.error('Generation Error:', err);
+        const msg = err.error?.detail || 'Generation failed. Check server logs.';
+        alert(msg);
         this.isGenerating = false;
       }
     });

@@ -358,18 +358,23 @@ async def generate_project(project_id: str, body: Dict[str, Any]):
     project_dir = STORAGE_DIR / project_id
     output_zip = project_dir / "output.zip"
     
-    # We will zip files in a particular folder structure.
-    # First create a build dir.
-    build_dir = project_dir / "build"
-    build_dir.mkdir(exist_ok=True)
-    images_build_dir = build_dir / "images"
-    images_build_dir.mkdir(exist_ok=True)
-    css_dir = build_dir / "css"
-    css_dir.mkdir(exist_ok=True)
-    js_dir = build_dir / "js"
-    js_dir.mkdir(exist_ok=True)
-    media_build_dir = build_dir / "media"
-    media_build_dir.mkdir(exist_ok=True)
+    try:
+        # We will zip files in a particular folder structure.
+        # First create a build dir.
+        build_dir = project_dir / "build"
+        # Clear old build if exists
+        if build_dir.exists():
+            shutil.rmtree(build_dir)
+            
+        build_dir.mkdir(exist_ok=True)
+        images_build_dir = build_dir / "images"
+        images_build_dir.mkdir(exist_ok=True)
+        css_dir = build_dir / "css"
+        css_dir.mkdir(exist_ok=True)
+        js_dir = build_dir / "js"
+        js_dir.mkdir(exist_ok=True)
+        media_build_dir = build_dir / "media"
+        media_build_dir.mkdir(exist_ok=True)
     
     # Build nav arrow CSS (vertical position)
     # Parse home position
@@ -600,16 +605,20 @@ function toggleMenu(id) {
                     with open(html_file, 'w', encoding='utf-8') as f:
                         f.write(str(soup))
 
-    # ZIP it up
-    shutil.make_archive(str(project_dir / "output"), 'zip', build_dir)
-    
-    # Persist the updated hotspots/state
-    projects_db[project_id]['pages'] = new_pages
-    projects_db[project_id]['nav_arrows_position'] = nav_arrows_position
-    projects_db[project_id]['home_position'] = home_position
-    save_db()
+        # ZIP it up
+        shutil.make_archive(str(project_dir / "output"), 'zip', build_dir)
+        
+        # Persist the updated hotspots/state
+        projects_db[project_id]['pages'] = new_pages
+        projects_db[project_id]['nav_arrows_position'] = nav_arrows_position
+        projects_db[project_id]['home_position'] = home_position
+        save_db()
 
-    return {"download_url": f"/download/{project_id}"}
+        return {"download_url": f"/download/{project_id}"}
+    except Exception as e:
+        import traceback
+        print(traceback.format_exc())
+        raise HTTPException(status_code=500, detail=f"Generation failed: {str(e)}")
 
 
 @app.get("/download/{project_id}")
