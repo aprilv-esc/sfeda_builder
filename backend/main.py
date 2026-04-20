@@ -310,7 +310,7 @@ async def generate_project(project_id: str, body: Dict[str, Any]):
         'top':    'top: 2%; transform: none;',
         'middle': 'top: 50%; transform: translateY(-50%);',
         'bottom': 'bottom: 2%; transform: none;',
-        'none':   'display: none;',
+        'none':   'top: 0; height: 100%; width: 15%; color: transparent; background: transparent; font-size: 0; transition: none;',
     }
     arrow_v = _arrow_v_map.get(nav_arrows_position, _arrow_v_map['bottom'])
 
@@ -327,7 +327,6 @@ body, html {{ margin: 0; padding: 0; width: 100%; height: 100%; background: #000
 /* Navigation Buttons */
 .nav-btn, .home-btn {{
     position: absolute;
-    {home_v}
     z-index: 100;
     text-decoration: none;
     color: white;
@@ -414,9 +413,10 @@ body, html {{ margin: 0; padding: 0; width: 100%; height: 100%; background: #000
 
 .nav-btn:hover, .home-btn:hover {{ transform: scale(1.1); opacity: 0.8; }}
 
-.nav-prev {{ left: 2%; {arrow_v} font-size: 2.5rem; }}
-.nav-next {{ right: 2%; {arrow_v} font-size: 2.5rem; }}
-.home-btn {{ {home_v} font-size: 1.5rem; font-weight: 500; }}
+.nav-prev { left: 0; {arrow_v} }
+.nav-next { right: 0; {arrow_v} }
+.home-btn { {home_v} font-size: 1.5rem; font-weight: 500; }
+.nav-btn:not([style*="display: none"]) { font-size: 2.5rem; }
 
 /* Transitions */
 @keyframes fadeInScale {{
