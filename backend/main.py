@@ -58,10 +58,15 @@ def load_template(path, default=""):
     print(f"WARNING: Template {path} not found at {t_path}")
     return default
 
-SFE_STYLE = load_template("css/style.css")
-SFE_CONTROL = load_template("js/control.js")
-SFE_JQUERY = load_template("js/jquery.min.js")
-SFE_TRACKING = load_template("js/tracking.js")
+# Load SFE Templates with safety
+try:
+    SFE_STYLE = load_template("css/style.css")
+    SFE_CONTROL = load_template("js/control.js")
+    SFE_JQUERY = load_template("js/jquery.min.js")
+    SFE_TRACKING = load_template("js/tracking.js")
+except Exception as e:
+    print(f"CRITICAL: Failed to load core SFE templates: {e}")
+    SFE_STYLE = SFE_CONTROL = SFE_JQUERY = SFE_TRACKING = ""
 
 # Mount the storage directory so we can serve generated images
 app.mount("/storage", StaticFiles(directory=STORAGE_DIR), name="storage")
