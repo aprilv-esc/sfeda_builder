@@ -376,10 +376,6 @@ export class AppComponent implements OnInit {
     hotspot.menuItems.splice(index, 1);
   }
 
-  removeMenuItem(hotspot: any, index: number) {
-    hotspot.menuItems.splice(index, 1);
-  }
-
   openModal(page: any) {
     this.activeModalPage = page;
     // Disable background scrolling to avoid messiness
