@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, Response
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -70,6 +70,11 @@ except Exception as e:
 
 # Mount the storage directory so we can serve generated images
 app.mount("/storage", StaticFiles(directory=STORAGE_DIR), name="storage")
+
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    # Return 204 No Content to satisfy the browser without a file
+    return Response(status_code=204)
 
 @app.get("/")
 def read_root():
