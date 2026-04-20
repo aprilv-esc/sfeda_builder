@@ -358,8 +358,12 @@ async def upload_file(file: UploadFile = File(...)):
             
             for i in range(len(doc)):
                 page = doc.load_page(i)
-                # Default PDF width may be small, increase resolution with matrix
-                zoom = 2 # to get a higher PPI
+                # SFE COMPLIANCE: Force use of MediaBox to prevent cropping of footer buttons
+                # This ensures that buttons at the very bottom edge are captured.
+                page.set_cropbox(page.mediabox)
+                
+                # Default PDF width may be small, increase resolution for sharp buttons
+                zoom = 3 # Increased to 3 (300dpi approx) for better small text clarity
                 mat = fitz.Matrix(zoom, zoom)
                 pix = page.get_pixmap(matrix=mat)
                 image_name = f"slide_{i+1}.png"
