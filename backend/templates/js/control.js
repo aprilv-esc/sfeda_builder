@@ -93,6 +93,19 @@ function showVid(){
 
 function playVid(){
     var play=document.getElementById("slideVid");
-    play.loop=true;
-    play.play();
+    if(play) {
+        play.loop=true;
+        play.play();
+    }
+}
+
+/* SFE COMPLIANCE: Menu toggle function */
+function toggleMenu(menuId) {
+    var menu = document.getElementById(menuId);
+    if (!menu) return;
+    if (menu.style.display === "flex") {
+        menu.style.display = "none";
+    } else {
+        menu.style.display = "flex";
+    }
 }
