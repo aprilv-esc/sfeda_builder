@@ -20,44 +20,31 @@ body,html{
     width: 100%;
     position: relative;
     overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
+
+/* Base styles for the container. Specific ratio injected into HTML */
 #aspect-ratio-container {
     background: #000;
-    width: 100%;
-    height: 100%;
     margin: auto;
     overflow: hidden;
     position: relative;
 }
 
-#slideCover{
-  display: block;
-  width: 100%;
-  height: 100%;
-  position: relative;
-  z-index: 5;
-}
-
-/* Ensure the slide cover matches the aspect ratio container exactly */
 #slideCover {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    position: relative;
     width: 100%;
     height: 100%;
     overflow: hidden;
     z-index: 10;
-    display: block; /* SFE Rule: Block layout for absolute children */
 }
 
 #slideCover img {
     width: 100%;
     height: 100%;
-    object-fit: contain;
-    position: absolute;
-    top: 0;
-    left: 0;
+    display: block;
     z-index: 5;
 }
 

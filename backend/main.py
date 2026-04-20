@@ -236,7 +236,7 @@ def create_dummy_slide(title: str, text: str, dest_path: str):
         
     img.save(dest_path)
 
-def get_base_html(image_filename, prev_filename="", next_filename="", video_filename="", v_top=10, v_left=10, v_width=80, v_height=80, hotspots=None, home_position='none'):
+def get_base_html(image_filename, prev_filename="", next_filename="", video_filename="", v_top=10, v_left=10, v_width=80, v_height=80, hotspots=None, home_position='none', aspect_ratio=1.333):
     video_embed = ""
     if video_filename:
         # Put id directly on video for control.js play() call
@@ -282,6 +282,13 @@ def get_base_html(image_filename, prev_filename="", next_filename="", video_file
         <title>Detailing Aid Slide</title>
         <style>
 [[STYLE]]
+            #aspect-ratio-container {
+                aspect-ratio: [[RATIO]];
+                max-width: 100%;
+                max-height: 100%;
+                width: auto;
+                height: auto;
+            }
         </style>
         <script type="text/javascript">
 [[JQUERY]]
@@ -318,6 +325,7 @@ def get_base_html(image_filename, prev_filename="", next_filename="", video_file
     html = html.replace("[[VIDEO_EMBED]]", video_embed)
     html = html.replace("[[HOTSPOT_HTML]]", hotspot_html)
     html = html.replace("[[MENU_OVERLAYS]]", menu_overlays)
+    html = html.replace("[[RATIO]]", str(aspect_ratio))
     
     return html
 
@@ -577,7 +585,24 @@ async def generate_project(project_id: str, body: Dict[str, Any]):
                     processed_hotspots.append(h_copy)
                 
                 print(f"DEBUG: Generating {new_html_name} with {len(processed_hotspots)} hotspots")
-                html_content = get_base_html(image_name, prev_html_name, next_html_name, video_name, v_top, v_left, v_width, v_height, processed_hotspots, home_position)
+                
+                # SFE COMPLIANCE: Calculate aspect ratio for precision lock
+                aspect_ratio = 1.333 # Fallback
+                try:
+                    with Image.open(src_image) as img_ref:
+                        w, h = img_ref.size
+                        aspect_ratio = round(w / h, 4)
+                except Exception as e:
+                    print(f"WARNING: Could not read image size for {image_name}: {e}")
+
+                html_content = get_base_html(image_filename=image_name, 
+                                            prev_filename=prev_html_name, 
+                                            next_filename=next_html_name, 
+                                            video_filename=video_name, 
+                                            v_top=v_top, v_left=v_left, v_width=v_width, v_height=v_height, 
+                                            hotspots=processed_hotspots, 
+                                            home_position=home_position,
+                                            aspect_ratio=aspect_ratio)
                 
                 with open(build_dir / new_html_name, "w") as f:
                     f.write(html_content)
