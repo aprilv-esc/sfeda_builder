@@ -227,22 +227,24 @@ def get_base_html(image_filename, prev_filename="", next_filename="", video_file
     if hotspots:
         for idx, h in enumerate(hotspots):
             h_top, h_left, h_width, h_height = h.get('top', 0), h.get('left', 0), h.get('width', 0), h.get('height', 0)
-            h_type = h.get('type')
-            common_style = f"position: absolute; top: {h_top}%; left: {h_left}%; width: {h_width}%; height: {h_height}%; z-index: 60;"
+            h_type = str(h.get('type', '')).lower()
+            # z-index 1000 to ensure it's above ALL other layers including safe-zone
+            common_style = f"position: absolute; top: {h_top}%; left: {h_left}%; width: {h_width}%; height: {h_height}%; z-index: 1000;"
             
             if h_type == 'home':
-                # SFE RULE 2: Landing page is index.html
                 hotspot_html += f'<a href="index.html" style="{common_style}"></a>'
             elif h_type == 'nav':
                 target = h.get('target', '#')
-                # If target is the ID of the first slide, ensure it points to index.html
+                if not target.endswith('.html') and target != '#': target = f"{target}.html"
                 hotspot_html += f'<a href="{target}" style="{common_style}"></a>'
-            elif h_type == 'menu':
+            elif 'menu' in h_type or 'popup' in h_type:
                 menu_id = f"custom-menu-{idx}"
                 hotspot_html += f'<a href="javascript:void(0)" onclick="toggleMenu(\'{menu_id}\')" style="{common_style}"></a>'
                 items_html = ""
                 for item in h.get('menuItems', []):
-                    items_html += f'<li><a href="{item.get("target", "#")}">{item.get("label", "Link")}</a></li>'
+                    target = item.get("target", "#")
+                    if not target.endswith('.html') and target != '#': target = f"{target}.html"
+                    items_html += f'<li><a href="{target}">{item.get("label", "Link")}</a></li>'
                 menu_overlays += f"""
                 <div id="{menu_id}" class="popup-menu-overlay" onclick="toggleMenu('{menu_id}')">
                     <div class="popup-menu-content" onclick="event.stopPropagation()">
@@ -499,62 +501,48 @@ async def generate_project(project_id: str, body: Dict[str, Any]):
                 if src_image.exists():
                     shutil.copy(src_image, images_build_dir / image_name)
                 
-                # Previous file name
+                # NEW: More robust next/prev naming
                 prev_html_name = ""
-                if i - 1 >= 0:
+                if i > 0:
                     prev_id = project['pages'][i-1]['id']
-                    prev_html_name = rename_map.get(prev_id, project['pages'][i-1]['html_name'])
+                    prev_html_name = rename_map.get(prev_id, project['pages'][i-1].get('html_name', ''))
                     
-                # Next file name
                 next_html_name = ""
-                if i + 1 < len(project['pages']):
+                if i < len(project['pages']) - 1:
                     next_id = project['pages'][i+1]['id']
-                    next_html_name = rename_map.get(next_id, project['pages'][i+1]['html_name'])
+                    next_html_name = rename_map.get(next_id, project['pages'][i+1].get('html_name', ''))
                     
-                video_name = page.get('video_name', '')
-                if video_name:
-                    src_video = project_dir / "media" / video_name
-                    if src_video.exists():
-                        shutil.copy(src_video, media_build_dir / video_name)
-                        
-                # Grab dimensions and interaction hotspots from the frontend state payload
-                frontend_page = frontend_state_map.get(page['id'], {})
-                v_top = frontend_page.get('video_top', 10)
-                v_left = frontend_page.get('video_left', 10)
-                v_width = frontend_page.get('video_width', 80)
-                v_height = frontend_page.get('video_height', 80)
-                raw_hotspots = frontend_page.get('hotspots', [])
-                
                 # SFE COMPLIANCE: Rewrite hotspot targets using the rename_map
-                # This ensures that if a slide was renamed to "ProductBenefits.html",
-                # all links pointing to the old "slide_x.html" ID are updated.
                 processed_hotspots = []
-                # Find the ID of the first slide to ensure "Home" targets point to index.html
                 first_slide_id = project['pages'][0]['id'] if project['pages'] else None
                 
+                # Check for hotspots in the payload
+                raw_hotspots = frontend_page.get('hotspots', [])
                 for h in raw_hotspots:
                     h_copy = h.copy()
+                    t_type = str(h_copy.get('type', '')).lower()
                     target = h_copy.get('target', '')
-                    if target == first_slide_id:
+                    
+                    # Resolve Target
+                    if t_type == 'home' or target == first_slide_id:
                         h_copy['target'] = "index.html"
                     elif target in rename_map:
                         h_copy['target'] = rename_map[target]
+                    else:
+                        if not target.endswith('.html') and target and target != '#':
+                            h_copy['target'] = f"{target}.html"
                     
-                    # Also update targets inside menu items if it's a menu type
+                    # Handle Menu Items
                     if 'menuItems' in h_copy:
-                        new_menu_items = []
                         for item in h_copy['menuItems']:
-                            item_copy = item.copy()
-                            i_target = item_copy.get('target', '')
+                            i_target = item.get('target', '')
                             if i_target == first_slide_id:
-                                item_copy['target'] = "index.html"
+                                item['target'] = "index.html"
                             elif i_target in rename_map:
-                                item_copy['target'] = rename_map[i_target]
-                            new_menu_items.append(item_copy)
-                        h_copy['menuItems'] = new_menu_items
-                    
+                                item['target'] = rename_map[i_target]
                     processed_hotspots.append(h_copy)
-
+                
+                print(f"DEBUG: Generating {new_html_name} with {len(processed_hotspots)} hotspots")
                 html_content = get_base_html(image_name, prev_html_name, next_html_name, video_name, v_top, v_left, v_width, v_height, processed_hotspots, home_position)
                 
                 with open(build_dir / new_html_name, "w") as f:
