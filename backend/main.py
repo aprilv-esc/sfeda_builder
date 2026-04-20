@@ -20,8 +20,16 @@ app = FastAPI(title="Detailing Aid Converter API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    # Explicitly allow the known frontend and all subdomains, plus local testing
+    allow_origins=[
+        "https://sfeda-builder.vercel.app",
+        "https://sfeda-builder-gamma.vercel.app",
+        "http://localhost:4200",
+        "http://localhost:8000"
+    ],
+    # Or allow all origins but without credentials for maximum compatibility
+    # allow_origins=["*"], 
+    allow_credentials=True, # Set to True to allow cookies/auth if needed later
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -57,27 +65,29 @@ def save_db():
 
 def load_db():
     global projects_db
-    if DB_FILE.exists():
+    if DB_FILE.exists() and DB_FILE.stat().st_size > 0:
         try:
             with open(DB_FILE, "r") as f:
-                projects_db = json.load(f)
+                content = f.read().strip()
+                if not content:
+                    projects_db = {}
+                    return
+                projects_db = json.loads(content)
                 # Sanitize: Ensure hotspots and required fields exist for all pages
                 for pid, data in projects_db.items():
                     if 'pages' in data:
                         for page in data['pages']:
                             if 'hotspots' not in page:
                                 page['hotspots'] = []
-                            if 'video_top' not in page:
-                                page['video_top'] = 0
-                            if 'video_left' not in page:
-                                page['video_left'] = 0
-                            if 'video_width' not in page:
-                                page['video_width'] = 0
-                            if 'video_height' not in page:
-                                page['video_height'] = 0
+                            # ... defaults
+                            for key in ['video_top', 'video_left', 'video_width', 'video_height']:
+                                if key not in page:
+                                    page[key] = 0
         except Exception as e:
-            print(f"Error loading DB: {e}")
+            print(f"Critical error loading DB: {e}")
             projects_db = {}
+    else:
+        projects_db = {}
 
 # Initialize DB on start
 load_db()
