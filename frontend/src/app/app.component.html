@@ -110,11 +110,11 @@
               <div>Width:<br><input type="number" [(ngModel)]="page.video_width" style="width:100%; padding: 0.25rem; border-radius: 4px; border: 1px solid var(--border);" placeholder="Width %"></div>
               <div>Height:<br><input type="number" [(ngModel)]="page.video_height" style="width:100%; padding: 0.25rem; border-radius: 4px; border: 1px solid var(--border);" placeholder="Height %"></div>
             </div>
-            
-            <button class="btn btn-secondary maximize-btn" style="width: 100%; margin-top: 1rem; padding: 0.5rem; font-size: 0.8rem; border-color: var(--primary); color: var(--primary);" (click)="openModal(page)">
-              🔍 Maximize & Manage Hotspots
-            </button>
           </div>
+          
+          <button class="btn btn-secondary maximize-btn" style="width: 100%; margin-top: 1rem; padding: 0.5rem; font-size: 0.8rem; border-color: var(--primary); color: var(--primary);" (click)="openModal(page)">
+            🔍 Maximize & Manage Hotspots
+          </button>
 
           <!-- Hotspots Management List -->
           <div *ngIf="page.hotspots.length > 0" style="margin-top: 1.5rem; border-top: 1px solid var(--border); padding-top: 1rem;">
