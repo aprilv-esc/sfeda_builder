@@ -628,16 +628,16 @@ async def generate_project(project_id: str, body: Dict[str, Any]):
                         with open(html_file, 'w', encoding='utf-8') as f:
                             f.write(str(soup))
 
-            # ZIP it up
-            shutil.make_archive(str(project_dir / "output"), 'zip', build_dir)
-            
-            # Persist the updated hotspots/state
-            projects_db[project_id]['pages'] = new_pages
-            projects_db[project_id]['nav_arrows_position'] = nav_arrows_position
-            projects_db[project_id]['home_position'] = home_position
-            save_db()
+        # ZIP it up (Handles both PDF and ZIP source types)
+        shutil.make_archive(str(project_dir / "output"), 'zip', build_dir)
+        
+        # Persist the updated hotspots/state
+        projects_db[project_id]['pages'] = new_pages
+        projects_db[project_id]['nav_arrows_position'] = nav_arrows_position
+        projects_db[project_id]['home_position'] = home_position
+        save_db()
 
-            return {"download_url": f"/download/{project_id}"}
+        return {"download_url": f"/download/{project_id}"}
 
     except Exception as e:
         import traceback
