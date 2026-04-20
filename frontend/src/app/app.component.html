@@ -246,28 +246,31 @@
   </div> <!-- End ProjectId -->
 
   <!-- Modal -->
-  <div *ngIf="activeModalPage" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
-    <div style="width: 100%; max-width: 90vw; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
-      <div style="color: white; font-size: 1.25rem; font-weight: 600; display: flex; align-items: center; gap: 1rem;">
-        High-Precision Bounding Box Editor
-        <div style="display: flex; gap: 0.25rem; background: rgba(255,255,255,0.1); padding: 0.3rem; border-radius: 8px;">
-          <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 0.75rem;" [style.background]="drawingMode === 'video' ? 'var(--primary)' : ''" (click)="drawingMode = 'video'">📹 Video</button>
-          <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 0.75rem;" [style.background]="drawingMode === 'home' ? '#10B981' : ''" (click)="drawingMode = 'home'">⌂ Home</button>
-          <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 0.75rem;" [style.background]="drawingMode === 'nav' ? '#F59E0B' : ''" (click)="drawingMode = 'nav'">🔗 Slide</button>
-          <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 0.75rem;" [style.background]="drawingMode === 'menu' ? '#8B5CF6' : ''" (click)="drawingMode = 'menu'">☰ Menu</button>
+  <div *ngIf="activeModalPage" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); z-index: 9999; display: flex; flex-direction: column; align-items: center; padding: 2rem; backdrop-filter: blur(8px); overflow-y: auto;">
+    
+    <!-- Modal Header -->
+    <div style="width: 100%; max-width: 1200px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-shrink: 0;">
+      <div style="color: white; font-size: 1.5rem; font-weight: 700; display: flex; align-items: center; gap: 1.5rem;">
+        🛠️ Precision Editor
+        <div style="display: flex; gap: 0.5rem; background: rgba(255,255,255,0.1); padding: 0.4rem; border-radius: 10px;">
+          <button class="btn btn-secondary" style="padding: 4px 12px; font-size: 0.85rem;" [style.background]="drawingMode === 'video' ? 'var(--primary)' : ''" (click)="drawingMode = 'video'">📹 Video</button>
+          <button class="btn btn-secondary" style="padding: 4px 12px; font-size: 0.85rem;" [style.background]="drawingMode === 'home' ? '#10B981' : ''" (click)="drawingMode = 'home'">⌂ Home</button>
+          <button class="btn btn-secondary" style="padding: 4px 12px; font-size: 0.85rem;" [style.background]="drawingMode === 'nav' ? '#F59E0B' : ''" (click)="drawingMode = 'nav'">🔗 Slide</button>
+          <button class="btn btn-secondary" style="padding: 4px 12px; font-size: 0.85rem;" [style.background]="drawingMode === 'menu' ? '#8B5CF6' : ''" (click)="drawingMode = 'menu'">☰ Menu</button>
         </div>
       </div>
-      <button class="btn btn-secondary" style="background: white; color: black;" (click)="closeModal()">Done & Close</button>
+      <button class="btn btn-primary" style="padding: 0.75rem 2rem; font-weight: bold; background: #fff; color: #000;" (click)="closeModal()">Done & Save</button>
     </div>
 
-    <div style="position: relative; width: 90vw; height: 70vh; background: #e5e7eb; border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);">
-      <div class="thumbnail-canvas-container" style="position: relative; max-width: 100%; max-height: 100%; cursor: crosshair; user-select: none;"
+    <!-- Main Canvas Area -->
+    <div style="position: relative; width: 100%; max-width: 1200px; height: 75vh; background: #1a1a1a; border-radius: 16px; overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); border: 1px solid rgba(255,255,255,0.1);">
+      <div class="thumbnail-canvas-container" style="position: relative; max-width: 100%; max-height: 100%; cursor: crosshair; user-select: none; display: flex; align-items: center; justify-content: center;"
            (mousedown)="onMouseDown($event, activeModalPage)" 
            (mousemove)="onMouseMove($event, activeModalPage)" 
            (mouseup)="onMouseUp(activeModalPage)" 
            (mouseleave)="onMouseUp(activeModalPage)">
         
-        <img [src]="API_BASE + '/storage/' + projectId + '/images/' + activeModalPage.image_name" style="display: block; max-width: 100%; max-height: 100%; object-fit: contain; pointer-events: none;" />
+        <img [src]="API_BASE + '/storage/' + projectId + '/images/' + activeModalPage.image_name" style="max-width: 100%; max-height: 75vh; display: block; object-fit: contain; pointer-events: none;" />
 
         <!-- Preview Video Box -->
         <div *ngIf="activeModalPage.video_name" 
@@ -280,7 +283,7 @@
 
         <!-- Render Hotspots -->
         <div *ngFor="let h of activeModalPage.hotspots" 
-             style="position: absolute; border: 3px solid; pointer-events: none; z-index: 11; display: flex; align-items: flex-start; justify-content: flex-end;"
+             style="position: absolute; border: 3px solid; pointer-events: none; z-index: 11;"
              [style.border-color]="h.type === 'home' ? '#10B981' : h.type === 'nav' ? '#F59E0B' : '#8B5CF6'"
              [style.background]="h.type === 'home' ? 'rgba(16, 185, 129, 0.2)' : h.type === 'nav' ? 'rgba(245, 158, 11, 0.2)' : 'rgba(139, 92, 246, 0.2)'"
              [style.top.%]="h.top" 
@@ -291,7 +294,7 @@
       </div>
     </div>
     
-    <div style="color: #e5e7eb; margin-top: 1.5rem; font-size: 0.9rem;">
-      Click and drag to precisely trace your hotspots. Layout is automatically saved.
+    <div style="color: #999; margin-top: 1.5rem; font-size: 1rem; font-weight: 500;">
+      ✨ Click and drag on the image above to trace your interactive regions.
     </div>
   </div>
