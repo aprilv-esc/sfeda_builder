@@ -44,6 +44,24 @@ async def global_exception_handler(request, exc):
 
 STORAGE_DIR = Path("/app/storage") if os.path.exists("/app") else Path("storage")
 STORAGE_DIR.mkdir(parents=True, exist_ok=True)
+DB_FILE = STORAGE_DIR / "projects.json"
+TEMPLATES_DIR = Path(__file__).parent / "templates"
+
+# Load SFE Templates
+def load_template(path, default=""):
+    t_path = TEMPLATES_DIR / path
+    if t_path.exists():
+        with open(t_path, "r", encoding="utf-8", errors="replace") as f:
+            content = f.read()
+            print(f"DEBUG: Loaded template {path} ({len(content)} bytes)")
+            return content
+    print(f"WARNING: Template {path} not found at {t_path}")
+    return default
+
+SFE_STYLE = load_template("css/style.css")
+SFE_CONTROL = load_template("js/control.js")
+SFE_JQUERY = load_template("js/jquery.min.js")
+SFE_TRACKING = load_template("js/tracking.js")
 
 # Mount the storage directory so we can serve generated images
 app.mount("/storage", StaticFiles(directory=STORAGE_DIR), name="storage")
@@ -53,7 +71,6 @@ def read_root():
     return {"status": "ok", "message": "DA Converter API is running."}
 
 # DB Persistence
-DB_FILE = STORAGE_DIR / "projects.json"
 projects_db = {}
 
 def save_db():
@@ -193,16 +210,11 @@ def create_dummy_slide(title: str, text: str, dest_path: str):
     img.save(dest_path)
 
 def get_base_html(image_filename, prev_filename="", next_filename="", video_filename="", v_top=10, v_left=10, v_width=80, v_height=80, hotspots=None, home_position='none'):
-    prev_link = f'<a href="{prev_filename}" class="nav-btn nav-prev">&#10094;</a>' if prev_filename else ''
-    next_link = f'<a href="{next_filename}" class="nav-btn nav-next">&#10095;</a>' if next_filename else ''
-    home_link = f'<a href="index.html" class="home-btn" style="{"display:none" if home_position == "none" else ""}"><span>&#8962; Home</span></a>'
-    
     video_embed = ""
     if video_filename:
+        # Put id directly on video for control.js play() call
         video_embed = f"""
-            <div class="video-overlay" style="position: absolute; top: {v_top}%; left: {v_left}%; width: {v_width}%; height: {v_height}%; z-index: 50;">
-                <video src="media/{video_filename}" controls autoplay loop playsinline></video>
-            </div>
+            <video id="slideVid" src="./media/{video_filename}" autoplay loop playsinline muted style="position: absolute; top: {v_top}%; left: {v_left}%; width: {v_width}%; height: {v_height}%; z-index: 50; display: none;"></video>
         """
     
     hotspot_html = ""
@@ -211,7 +223,6 @@ def get_base_html(image_filename, prev_filename="", next_filename="", video_file
         for idx, h in enumerate(hotspots):
             h_top, h_left, h_width, h_height = h.get('top', 0), h.get('left', 0), h.get('width', 0), h.get('height', 0)
             h_type = h.get('type')
-            
             common_style = f"position: absolute; top: {h_top}%; left: {h_left}%; width: {h_width}%; height: {h_height}%; z-index: 60;"
             
             if h_type == 'home':
@@ -222,11 +233,9 @@ def get_base_html(image_filename, prev_filename="", next_filename="", video_file
             elif h_type == 'menu':
                 menu_id = f"custom-menu-{idx}"
                 hotspot_html += f'<a href="javascript:void(0)" onclick="toggleMenu(\'{menu_id}\')" style="{common_style}"></a>'
-                
                 items_html = ""
                 for item in h.get('menuItems', []):
                     items_html += f'<li><a href="{item.get("target", "#")}">{item.get("label", "Link")}</a></li>'
-                
                 menu_overlays += f"""
                 <div id="{menu_id}" class="popup-menu-overlay" onclick="toggleMenu('{menu_id}')">
                     <div class="popup-menu-content" onclick="event.stopPropagation()">
@@ -236,28 +245,40 @@ def get_base_html(image_filename, prev_filename="", next_filename="", video_file
                 </div>
                 """
 
-    return f"""<!DOCTYPE html>
+    html_template = """<!DOCTYPE html>
 <html>
     <head>
         <title>Detailing Aid Slide</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-        <link rel="stylesheet" type="text/css" href="css/style.css" />
+        <script type="text/javascript" language="javascript" src="./js/jquery.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="./css/style.css" />
+        <script type="text/javascript">
+[[TRACKING_SCRIPT]]
+        </script>
     </head>
-    <body id="top">
-        <main id="aspect-ratio-container" class="animate-fade">
-            {home_link}
-            {prev_link}
-            {next_link}
-            <div id="slideCover">
-                <img class="slide-bg" src="images/{image_filename}" />
-                {video_embed}
-                {hotspot_html}
+    <body>
+        <div id="gameContainer">
+            <div id="aspect-ratio-container">
+                <div id="slideCover">
+                    <img src="./images/[[IMAGE]]" data-next-file="[[NEXT]]" data-previous-file="[[PREV]]"/>
+                    [[VIDEO_EMBED]]
+                    [[HOTSPOT_HTML]]
+                </div>
             </div>
-            {menu_overlays}
-        </main>
-        <script type="text/javascript" language="javascript" src="js/control.js"></script>
+            [[MENU_OVERLAYS]]
+        </div>
+        <script type="text/javascript" language="javascript" src="./js/control.js"></script>
     </body>
 </html>"""
+
+    html = html_template.replace("[[TRACKING_SCRIPT]]", SFE_TRACKING)
+    html = html.replace("[[IMAGE]]", image_filename)
+    html = html.replace("[[NEXT]]", next_filename if next_filename else "")
+    html = html.replace("[[PREV]]", prev_filename if prev_filename else "")
+    html = html.replace("[[VIDEO_EMBED]]", video_embed)
+    html = html.replace("[[HOTSPOT_HTML]]", hotspot_html)
+    html = html.replace("[[MENU_OVERLAYS]]", menu_overlays)
+    
+    return html
 
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
@@ -317,7 +338,7 @@ async def upload_file(file: UploadFile = File(...)):
                 for name in files:
                     if name.endswith(".html"):
                         html_file = os.path.join(root, name)
-                        with open(html_file, 'r', encoding='utf-8') as f:
+                        with open(html_file, 'r', encoding='utf-8', errors='replace') as f:
                             soup = BeautifulSoup(f, 'html.parser')
                             
                         # Sanitize Links and try to extract title for suggestion
@@ -341,7 +362,7 @@ async def upload_file(file: UploadFile = File(...)):
                             if script.get('src', '').startswith(('http://', 'https://')):
                                 script.decompose()
                                 
-                        with open(html_file, 'w', encoding='utf-8') as f:
+                        with open(html_file, 'w', encoding='utf-8', errors='replace') as f:
                             f.write(str(soup))
                             
                         suggested_name = generate_filename(title_text, name, used_names)
@@ -446,132 +467,13 @@ async def generate_project(project_id: str, body: Dict[str, Any]):
         }
         arrow_v = _arrow_v_map.get(nav_arrows_position, _arrow_v_map['bottom'])
 
-        # Add dummy/template CSS and JS files
-        with open(css_dir / "style.css", "w") as f:
-            f.write(f"""/* Detailing Aid Styles */
-    body, html {{ margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; font-family: -apple-system, sans-serif; }}
-    #aspect-ratio-container {{ 
-        position: relative; width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; background: #fff;
-    }}
-    #slideCover {{ position: relative; display: inline-block; max-width: 100%; max-height: 100%; }}
-    .slide-bg {{ max-width: 100vw; max-height: 100vh; display: block; }}
-
-    /* Navigation Buttons */
-    .nav-btn, .home-btn {{
-        position: absolute;
-        z-index: 100;
-        text-decoration: none;
-        color: white;
-        font-size: 14px;
-        font-weight: bold;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-        background: transparent;
-        padding: 10px;
-        display: flex; align-items: center; justify-content: center;
-        transition: transform 0.2s, opacity 0.2s;
-    }}
-    .home-btn:hover {{
-        opacity: 0.8;
-    }}
-
-    /* Video Overlay */
-    .video-overlay {{
-        display: flex;
-        justify-content: center;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-        border-radius: 12px;
-        overflow: hidden;
-        background: transparent;
-    }}
-    .video-overlay video {{
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }}
-
-    /* Popup Menu Styles */
-    .popup-menu-overlay {{
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.6);
-        backdrop-filter: blur(8px);
-        display: none;
-        z-index: 2000;
-        justify-content: center;
-        align-items: center;
-    }}
-    .popup-menu-content {{
-        background: rgba(255, 255, 255, 0.95);
-        padding: 2rem;
-        border-radius: 20px;
-        width: 80%;
-        max-width: 400px;
-        box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-    }}
-    .popup-menu-content ul {{
-        list-style: none;
-        padding: 0;
-        margin: 0 0 1.5rem 0;
-    }}
-    .popup-menu-content li {{
-        margin-bottom: 0.75rem;
-    }}
-    .popup-menu-content a {{
-        display: block;
-        padding: 1rem;
-        background: #4F46E5;
-        color: white;
-        text-decoration: none;
-        border-radius: 12px;
-        text-align: center;
-        font-weight: 600;
-        transition: transform 0.2s;
-    }}
-    .popup-menu-content a:active {{
-        transform: scale(0.95);
-    }}
-    .close-menu {{
-        width: 100%;
-        padding: 0.75rem;
-        background: #E5E7EB;
-        border: none;
-        border-radius: 12px;
-        font-weight: 600;
-        cursor: pointer;
-    }}
-
-    .nav-btn:hover, .home-btn:hover {{ transform: scale(1.1); opacity: 0.8; }}
-
-    .nav-prev {{ left: 0; {arrow_v} }}
-    .nav-next {{ right: 0; {arrow_v} }}
-    .home-btn {{ {home_v} font-size: 1.5rem; font-weight: 500; }}
-    .nav-btn:not([style*="display: none"]) {{ font-size: 2.5rem; }}
-
-    /* Transitions */
-    @keyframes fadeInScale {{
-        from {{ opacity: 0; transform: scale(0.97); }}
-        to {{ opacity: 1; transform: scale(1); }}
-    }}
-    .animate-fade {{
-        animation: fadeInScale 0.6s cubic-bezier(0.25, 1, 0.5, 1) both;
-    }}
-    """)
-        with open(js_dir / "control.js", "w") as f:
-            f.write("""
-    function toggleMenu(id) {
-        var menu = document.getElementById(id);
-        if (menu.style.display === 'flex') {
-            menu.style.display = 'none';
-        } else {
-            menu.style.display = 'flex';
-        }
-    }
-    """)
-        with open(js_dir / "jquery.min.js", "w") as f:
-            f.write("// jQuery min")
+        # Add SFE-compliant CSS and JS files
+        with open(css_dir / "style.css", "w", encoding='utf-8', errors='replace') as f:
+            f.write(SFE_STYLE)
+        with open(js_dir / "control.js", "w", encoding='utf-8', errors='replace') as f:
+            f.write(SFE_CONTROL)
+        with open(js_dir / "jquery.min.js", "w", encoding='utf-8', errors='replace') as f:
+            f.write(SFE_JQUERY)
             
         project_type = project.get('type', '').lower()
         if project_type in ['pdf']:
@@ -638,13 +540,13 @@ async def generate_project(project_id: str, body: Dict[str, Any]):
                 for name in files:
                     if name.endswith(".html"):
                         html_file = os.path.join(root, name)
-                        with open(html_file, 'r', encoding='utf-8') as f:
+                        with open(html_file, 'r', encoding='utf-8', errors='replace') as f:
                             soup = BeautifulSoup(f, 'html.parser')
                         for a in soup.find_all('a'):
                             href = a.get('href', '')
                             if href in rename_map:
                                 a['href'] = rename_map[href]
-                        with open(html_file, 'w', encoding='utf-8') as f:
+                        with open(html_file, 'w', encoding='utf-8', errors='replace') as f:
                             f.write(str(soup))
 
         # ZIP it up (Handles both PDF and ZIP source types)
