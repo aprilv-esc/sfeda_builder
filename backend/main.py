@@ -20,22 +20,30 @@ app = FastAPI(title="Detailing Aid Converter API")
 
 app.add_middleware(
     CORSMiddleware,
-    # Explicitly allow the known frontend and all subdomains, plus local testing
-    allow_origins=[
-        "https://sfeda-builder.vercel.app",
-        "https://sfeda-builder-gamma.vercel.app",
-        "http://localhost:4200",
-        "http://localhost:8000"
-    ],
-    # Support Vercel preview deployments with regex
-    allow_origin_regex="https://sfeda-builder-.*\.vercel\.app",
-    allow_credentials=True, # Set to True to allow cookies/auth if needed later
+    # Most permissive configuration to avoid CORS issues on error responses
+    allow_origins=["*"],
+    allow_credentials=False, 
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-STORAGE_DIR = Path("storage")
-STORAGE_DIR.mkdir(exist_ok=True)
+@app.exception_handler(Exception)
+async def global_exception_handler(request, exc):
+    import traceback
+    error_msg = f"Unhandled error: {str(exc)}\n{traceback.format_exc()}"
+    print(error_msg)
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal Server Error", "error": str(exc)},
+        headers={
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "*",
+            "Access-Control-Allow-Headers": "*"
+        }
+    )
+
+STORAGE_DIR = Path("/app/storage") if os.path.exists("/app") else Path("storage")
+STORAGE_DIR.mkdir(parents=True, exist_ok=True)
 
 # Mount the storage directory so we can serve generated images
 app.mount("/storage", StaticFiles(directory=STORAGE_DIR), name="storage")
@@ -253,88 +261,99 @@ def get_base_html(image_filename, prev_filename="", next_filename="", video_file
 
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
-    project_id = str(uuid.uuid4())
-    project_dir = STORAGE_DIR / project_id
-    project_dir.mkdir(parents=True, exist_ok=True)
-    
-    file_path = project_dir / file.filename
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+    print(f"DEBUG: Starting upload for file: {file.filename}")
+    try:
+        project_id = str(uuid.uuid4())
+        project_dir = STORAGE_DIR / project_id
+        project_dir.mkdir(parents=True, exist_ok=True)
+        print(f"DEBUG: Created project directory: {project_dir}")
         
-    pages = []
-    used_names = {"index.html"}  # Reserve index.html so it's never auto-suggested
-    
-    if file.filename.lower().endswith(".pdf"):
-        # Convert PDF to images
-        doc = fitz.open(str(file_path))
-        images_dir = project_dir / "images"
-        images_dir.mkdir(exist_ok=True)
-        html_dir = project_dir / "slides"
-        html_dir.mkdir(exist_ok=True)
+        file_path = project_dir / file.filename
+        print(f"DEBUG: Saving file to: {file_path}")
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        print(f"DEBUG: File saved successfully")
         
-        for i in range(len(doc)):
-            page = doc.load_page(i)
-            # Default PDF width may be small, increase resolution with matrix
-            zoom = 2 # to get a higher PPI
-            mat = fitz.Matrix(zoom, zoom)
-            pix = page.get_pixmap(matrix=mat)
-            image_name = f"slide_{i+1}.png"
-            pix.save(str(images_dir / image_name))
+        pages = []
+        used_names = {"index.html"}  # Reserve index.html so it's never auto-suggested
+        
+        if file.filename.lower().endswith(".pdf"):
+            # Convert PDF to images
+            doc = fitz.open(str(file_path))
+            images_dir = project_dir / "images"
+            images_dir.mkdir(exist_ok=True)
+            html_dir = project_dir / "slides"
+            html_dir.mkdir(exist_ok=True)
             
-            # Extract text to generate a smart name
-            text = page.get_text()
-            suggested_name = generate_filename(text, f"slide_{i+1}.html", used_names)
-            
-            pages.append({"id": f"slide_{i+1}", "html_name": suggested_name, "image_name": image_name})
-            
-    elif file.filename.lower().endswith(".pptx"):
-        raise HTTPException(
-            status_code=400,
-            detail="PPTX files are not supported. Please convert your PPTX to PDF first, then upload the PDF."
-        )
+            for i in range(len(doc)):
+                page = doc.load_page(i)
+                # Default PDF width may be small, increase resolution with matrix
+                zoom = 2 # to get a higher PPI
+                mat = fitz.Matrix(zoom, zoom)
+                pix = page.get_pixmap(matrix=mat)
+                image_name = f"slide_{i+1}.png"
+                pix.save(str(images_dir / image_name))
+                
+                # Extract text to generate a smart name
+                text = page.get_text()
+                suggested_name = generate_filename(text, f"slide_{i+1}.html", used_names)
+                
+                pages.append({"id": f"slide_{i+1}", "html_name": suggested_name, "image_name": image_name})
+                
+        elif file.filename.lower().endswith(".pptx"):
+            raise HTTPException(
+                status_code=400,
+                detail="PPTX files are not supported. Please convert your PPTX to PDF first, then upload the PDF."
+            )
 
-    elif file.filename.lower().endswith(".zip"):
-        # Sanitize HTML logic
-        with zipfile.ZipFile(file_path, "r") as zip_ref:
-            zip_ref.extractall(project_dir / "extracted")
-        
-        # Traverse and sanitize
-        extracted_dir = project_dir / "extracted"
-        for root, dirs, files in os.walk(extracted_dir):
-            for name in files:
-                if name.endswith(".html"):
-                    html_file = os.path.join(root, name)
-                    with open(html_file, 'r', encoding='utf-8') as f:
-                        soup = BeautifulSoup(f, 'html.parser')
-                        
-                    # Sanitize Links and try to extract title for suggestion
-                    title_text = ""
-                    if soup.title and soup.title.string:
-                        title_text = soup.title.string
-                    elif soup.h1 and soup.h1.string:
-                        title_text = soup.h1.string
+        elif file.filename.lower().endswith(".zip"):
+            # Sanitize HTML logic
+            with zipfile.ZipFile(file_path, "r") as zip_ref:
+                zip_ref.extractall(project_dir / "extracted")
+            
+            # Traverse and sanitize
+            extracted_dir = project_dir / "extracted"
+            for root, dirs, files in os.walk(extracted_dir):
+                for name in files:
+                    if name.endswith(".html"):
+                        html_file = os.path.join(root, name)
+                        with open(html_file, 'r', encoding='utf-8') as f:
+                            soup = BeautifulSoup(f, 'html.parser')
+                            
+                        # Sanitize Links and try to extract title for suggestion
+                        title_text = ""
+                        if soup.title and soup.title.string:
+                            title_text = soup.title.string
+                        elif soup.h1 and soup.h1.string:
+                            title_text = soup.h1.string
 
-                    for a in soup.find_all('a'):
-                        href = a.get('href', '')
-                        if href.startswith('http://') or href.startswith('https://'):
-                            a['href'] = '#' # Or remove the link entirely
+                        for a in soup.find_all('a'):
+                            href = a.get('href', '')
+                            if href.startswith('http://') or href.startswith('https://'):
+                                a['href'] = '#' # Or remove the link entirely
+                                
+                        # Remove body onload
+                        if soup.body and soup.body.has_attr('onload'):
+                            del soup.body['onload']
                             
-                    # Remove body onload
-                    if soup.body and soup.body.has_attr('onload'):
-                        del soup.body['onload']
-                        
-                    # Remove <script> with src pointing to external
-                    for script in soup.find_all('script'):
-                        if script.get('src', '').startswith(('http://', 'https://')):
-                            script.decompose()
+                        # Remove <script> with src pointing to external
+                        for script in soup.find_all('script'):
+                            if script.get('src', '').startswith(('http://', 'https://')):
+                                script.decompose()
+                                
+                        with open(html_file, 'w', encoding='utf-8') as f:
+                            f.write(str(soup))
                             
-                    with open(html_file, 'w', encoding='utf-8') as f:
-                        f.write(str(soup))
-                        
-                    suggested_name = generate_filename(title_text, name, used_names)
-                    pages.append({"id": name, "html_name": suggested_name, "image_name": ""})
-    else:
-        raise HTTPException(status_code=400, detail="Unsupported file format.")
+                        suggested_name = generate_filename(title_text, name, used_names)
+                        pages.append({"id": name, "html_name": suggested_name, "image_name": ""})
+        else:
+            raise HTTPException(status_code=400, detail="Unsupported file format.")
+        
+    except Exception as e:
+        import traceback
+        print(f"ERROR in upload_file: {str(e)}")
+        print(traceback.format_exc())
+        raise e
         
     import datetime
     projects_db[project_id] = {
