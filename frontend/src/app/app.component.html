@@ -124,8 +124,26 @@
                 <span [style.color]="h.type === 'home' ? '#10B981' : h.type === 'nav' ? '#F59E0B' : '#8B5CF6'" style="font-weight: 600;">
                   {{ h.type === 'home' ? '⌂ Home Link' : h.type === 'nav' ? '🔗 Slide Link' : '☰ Menu Popup' }}
                 </span>
-                <button (click)="deleteHotspot(page, h)" style="background: none; border: none; color: #EF4444; cursor: pointer; font-size: 0.75rem;">Delete</button>
+                <div style="display: flex; gap: 0.5rem;">
+                   <button (click)="replicateHotspot(h, 'all')" style="background: var(--primary); border: none; color: white; cursor: pointer; font-size: 0.75rem; padding: 2px 6px; border-radius: 4px;">Apply to All Slides</button>
+                   <button (click)="deleteHotspot(page, h)" style="background: none; border: none; color: #EF4444; cursor: pointer; font-size: 0.75rem;">Delete</button>
+                </div>
               </div>
+
+              <!-- Replication Options -->
+              <details style="margin-bottom: 1rem; font-size: 0.75rem; cursor: pointer;">
+                <summary style="color: var(--primary); font-weight: 500;">Replicate to Selected Slides...</summary>
+                <div style="padding: 0.5rem; background: #f3f4f6; border-radius: 4px; border: 1px solid #ddd; margin-top: 0.25rem;">
+                  <div *ngFor="let p of pages" style="display: flex; align-items: center; gap: 0.25rem;">
+                    <input type="checkbox" #slideCheck [id]="'check-'+hi+'-'+p.id" [disabled]="p.id === page.id">
+                    <label [for]="'check-'+hi+'-'+p.id">{{ p.new_html_name }}</label>
+                  </div>
+                  <button (click)="replicateHotspot(h, [])" class="btn btn-secondary" style="width: 100%; font-size: 0.75rem; padding: 2px; margin-top: 0.5rem; border-color: var(--primary); color: var(--primary);">
+                    Apply to Selected
+                  </button>
+                  <p style="font-size: 0.65rem; color: #666; margin-top: 0.25rem;">* Note: This will sync the position to the target slides.</p>
+                </div>
+              </details>
 
               <!-- Slide Link Settings -->
               <div *ngIf="h.type === 'nav'">
@@ -165,6 +183,7 @@
         <div>
           <label style="display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.4rem; color: var(--text-muted);">⬅ ➡ Arrow Buttons Position</label>
           <select [(ngModel)]="navArrowsPosition" style="padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); font-size: 0.9rem; cursor: pointer;">
+            <option value="none">None (Hide Arrows)</option>
             <option value="top">Top</option>
             <option value="middle">Middle</option>
             <option value="bottom">Bottom</option>
@@ -206,7 +225,15 @@
 <div *ngIf="activeModalPage" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
   
   <div style="width: 100%; max-width: 90vw; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
-    <div style="color: white; font-size: 1.25rem; font-weight: 600;">High-Precision Bounding Box Editor</div>
+    <div style="color: white; font-size: 1.25rem; font-weight: 600; display: flex; align-items: center; gap: 1rem;">
+      High-Precision Bounding Box Editor
+      <div style="display: flex; gap: 0.25rem; background: rgba(255,255,255,0.1); padding: 0.3rem; border-radius: 8px;">
+        <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 0.75rem;" [style.background]="drawingMode === 'video' ? 'var(--primary)' : ''" (click)="drawingMode = 'video'">📹 Video</button>
+        <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 0.75rem;" [style.background]="drawingMode === 'home' ? '#10B981' : ''" (click)="drawingMode = 'home'">⌂ Home</button>
+        <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 0.75rem;" [style.background]="drawingMode === 'nav' ? '#F59E0B' : ''" (click)="drawingMode = 'nav'">🔗 Slide</button>
+        <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 0.75rem;" [style.background]="drawingMode === 'menu' ? '#8B5CF6' : ''" (click)="drawingMode = 'menu'">☰ Menu</button>
+      </div>
+    </div>
     <button class="btn" style="background: #10B981; padding: 0.5rem 1.5rem;" (click)="closeModal()">Save & Close</button>
   </div>
   

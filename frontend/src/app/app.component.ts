@@ -304,6 +304,38 @@ export class AppComponent implements OnInit {
     }
   }
 
+  replicateHotspot(hotspot: any, targetPageIds: string[] | 'all') {
+    if (!hotspot) return;
+    
+    let targets = [];
+    if (targetPageIds === 'all') {
+      targets = this.pages.map(p => p.id);
+    } else {
+      targets = targetPageIds;
+    }
+
+    this.pages.forEach(p => {
+      if (targets.includes(p.id)) {
+        // Avoid self-replication or duplicate replication based on type+pos
+        const alreadyHas = p.hotspots.some((h: any) => 
+          h.type === hotspot.type && h.top === hotspot.top && h.left === hotspot.left);
+        
+        if (!alreadyHas) {
+          // Deep clone menu items if they exist
+          const clonedItems = hotspot.menuItems ? JSON.parse(JSON.stringify(hotspot.menuItems)) : undefined;
+          
+          p.hotspots.push({
+            ...hotspot,
+            id: Math.random().toString(36).substr(2, 9),
+            menuItems: clonedItems
+          });
+        }
+      }
+    });
+
+    alert(`Hotspot replicated to ${targets.length === this.pages.length ? 'all' : targets.length} slides.`);
+  }
+
   deleteHotspot(page: any, hotspot: any) {
     page.hotspots = page.hotspots.filter((h: any) => h.id !== hotspot.id);
   }

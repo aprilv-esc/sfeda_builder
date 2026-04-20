@@ -309,6 +309,7 @@ async def generate_project(project_id: str, body: Dict[str, Any]):
         'top':    'top: 2%; transform: none;',
         'middle': 'top: 50%; transform: translateY(-50%);',
         'bottom': 'bottom: 2%; transform: none;',
+        'none':   'display: none;',
     }
     arrow_v = _arrow_v_map.get(nav_arrows_position, _arrow_v_map['bottom'])
 
