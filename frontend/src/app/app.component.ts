@@ -304,14 +304,14 @@ export class AppComponent implements OnInit {
     }
   }
 
-  replicateHotspot(hotspot: any, targetPageIds: string[] | 'all') {
+  replicateHotspot(sourcePageId: string, hotspot: any, targetPageIds: string[] | 'all') {
     if (!hotspot) return;
     
     let targets: string[] = [];
     if (targetPageIds === 'all') {
-      targets = this.pages.map(p => p.id);
+      targets = this.pages.map(p => p.id).filter(id => id !== sourcePageId);
     } else {
-      targets = targetPageIds;
+      targets = targetPageIds.filter(id => id !== sourcePageId);
     }
 
     if (targets.length === 0) {
