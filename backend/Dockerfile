@@ -1,10 +1,12 @@
-FROM python:3.11-slim
+FROM python:3.11
 
 WORKDIR /app
 
-# Install system dependencies required for PyMuPDF and Pillow
+# Install system dependencies required for PyMuPDF (fitz) pixmap rendering
 RUN apt-get update && apt-get install -y \
     build-essential \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements and install
@@ -18,4 +20,4 @@ COPY . .
 EXPOSE 8080
 
 # Start the application using shell form to expand $PORT
-CMD uvicorn main:app --host 0.0.0.0 --port $PORT
+CMD uvicorn main:app --host 0.0.0.0 --port ${PORT:-8080}
