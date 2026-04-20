@@ -93,6 +93,10 @@ export class AppComponent implements OnInit {
   }
 
   startTour() {
+    if (typeof introJs === 'undefined') {
+      console.warn('Intro.js library not loaded.');
+      return;
+    }
     introJs().setOptions({
       disableInteraction: false,
       showProgress: true,
