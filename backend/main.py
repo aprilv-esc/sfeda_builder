@@ -289,10 +289,13 @@ def get_base_html(image_filename, prev_filename="", next_filename="", video_file
 [[STYLE]]
             #aspect-ratio-container {
                 aspect-ratio: [[RATIO]];
-                max-width: 100%;
-                max-height: 100%;
-                width: auto;
-                height: auto;
+                width: 100%;
+                /* Viewport-Aware Scale: Fit either width or height, whichever is smaller */
+                max-width: calc(100vh * [[RATIO]]);
+                max-height: 100vh;
+                margin: auto;
+                position: relative;
+                overflow: visible; /* Prevent clipping of hotspots near edges */
             }
         </style>
         <script type="text/javascript">
