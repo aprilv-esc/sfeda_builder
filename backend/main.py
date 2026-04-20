@@ -512,6 +512,18 @@ async def generate_project(project_id: str, body: Dict[str, Any]):
                     next_id = project['pages'][i+1]['id']
                     next_html_name = rename_map.get(next_id, project['pages'][i+1].get('html_name', ''))
                     
+                # Grab dimensions and interaction hotspots from the frontend state payload
+                frontend_page = frontend_state_map.get(page['id'], {})
+                v_top = frontend_page.get('video_top', 10)
+                v_left = frontend_page.get('video_left', 10)
+                v_width = frontend_page.get('video_width', 80)
+                v_height = frontend_page.get('video_height', 80)
+                video_name = page.get('video_name', '')
+                if video_name:
+                    src_video = project_dir / "media" / video_name
+                    if src_video.exists():
+                        shutil.copy(src_video, media_build_dir / video_name)
+                        
                 # SFE COMPLIANCE: Rewrite hotspot targets using the rename_map
                 processed_hotspots = []
                 first_slide_id = project['pages'][0]['id'] if project['pages'] else None
