@@ -2,8 +2,8 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-import shutil
 import os
+import shutil
 import uuid
 import zipfile
 import json
@@ -27,8 +27,8 @@ app.add_middleware(
         "http://localhost:4200",
         "http://localhost:8000"
     ],
-    # Or allow all origins but without credentials for maximum compatibility
-    # allow_origins=["*"], 
+    # Support Vercel preview deployments with regex
+    allow_origin_regex="https://sfeda-builder-.*\.vercel\.app",
     allow_credentials=True, # Set to True to allow cookies/auth if needed later
     allow_methods=["*"],
     allow_headers=["*"],
@@ -155,8 +155,22 @@ def create_dummy_slide(title: str, text: str, dest_path: str):
     img = Image.new('RGB', (1024, 768), color=(240, 240, 240))
     d = ImageDraw.Draw(img)
     try:
-        font_large = ImageFont.truetype("/System/Library/Fonts/Supplemental/Arial.ttf", 40)
-        font_small = ImageFont.truetype("/System/Library/Fonts/Supplemental/Arial.ttf", 20)
+        # Try generic Linux/Mac paths or fallback to default
+        font_paths = [
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", # Common on Linux
+            "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+            "/System/Library/Fonts/Supplemental/Arial.ttf",   # Mac
+        ]
+        font_large = None
+        for path in font_paths:
+            if os.path.exists(path):
+                font_large = ImageFont.truetype(path, 40)
+                font_small = ImageFont.truetype(path, 20)
+                break
+        
+        if not font_large:
+            font_large = ImageFont.load_default()
+            font_small = font_large
     except IOError:
         font_large = ImageFont.load_default()
         font_small = font_large
@@ -385,246 +399,246 @@ async def generate_project(project_id: str, body: Dict[str, Any]):
         js_dir.mkdir(exist_ok=True)
         media_build_dir = build_dir / "media"
         media_build_dir.mkdir(exist_ok=True)
-    
-    # Build nav arrow CSS (vertical position)
-    # Parse home position
-    home_pos_str = str(home_position or 'top-right').lower()
-    home_side = 'right' if 'right' in home_pos_str else 'left'
-    
-    if 'top' in home_pos_str:
-        home_y_val = "top: 2%;"
-        home_transform = "none"
-    elif 'middle' in home_pos_str:
-        home_y_val = "top: 50%;"
-        home_transform = "translateY(-50%)"
-    elif 'bottom' in home_pos_str:
-        home_y_val = "bottom: 2%;"
-        home_transform = "none"
-    else: # none
-        home_y_val = "display: none;"
-        home_transform = "none"
-    
-    home_v = f"{home_y_val} {home_side}: 2%; transform: {home_transform};"
-    
-    _arrow_v_map = {
-        'top':    'top: 2%; transform: none;',
-        'middle': 'top: 50%; transform: translateY(-50%);',
-        'bottom': 'bottom: 2%; transform: none;',
-        'none':   'top: 0; height: 100%; width: 15%; opacity: 0; transition: none;',
+            # Build nav arrow CSS (vertical position)
+        # Parse home position
+        home_pos_str = str(home_position or 'top-right').lower()
+        home_side = 'right' if 'right' in home_pos_str else 'left'
+        
+        if 'top' in home_pos_str:
+            home_y_val = "top: 2%;"
+            home_transform = "none"
+        elif 'middle' in home_pos_str:
+            home_y_val = "top: 50%;"
+            home_transform = "translateY(-50%)"
+        elif 'bottom' in home_pos_str:
+            home_y_val = "bottom: 2%;"
+            home_transform = "none"
+        else: # none
+            home_y_val = "display: none;"
+            home_transform = "none"
+        
+        home_v = f"{home_y_val} {home_side}: 2%; transform: {home_transform};"
+        
+        _arrow_v_map = {
+            'top':    'top: 2%; transform: none;',
+            'middle': 'top: 50%; transform: translateY(-50%);',
+            'bottom': 'bottom: 2%; transform: none;',
+            'none':   'top: 0; height: 100%; width: 15%; opacity: 0; transition: none;',
+        }
+        arrow_v = _arrow_v_map.get(nav_arrows_position, _arrow_v_map['bottom'])
+
+        # Add dummy/template CSS and JS files
+        with open(css_dir / "style.css", "w") as f:
+            f.write(f"""/* Detailing Aid Styles */
+    body, html {{ margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; font-family: -apple-system, sans-serif; }}
+    #aspect-ratio-container {{ 
+        position: relative; width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; background: #fff;
+    }}
+    #slideCover {{ position: relative; display: inline-block; max-width: 100%; max-height: 100%; }}
+    .slide-bg {{ max-width: 100vw; max-height: 100vh; display: block; }}
+
+    /* Navigation Buttons */
+    .nav-btn, .home-btn {{
+        position: absolute;
+        z-index: 100;
+        text-decoration: none;
+        color: white;
+        font-size: 14px;
+        font-weight: bold;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        background: transparent;
+        padding: 10px;
+        display: flex; align-items: center; justify-content: center;
+        transition: transform 0.2s, opacity 0.2s;
+    }}
+    .home-btn:hover {{
+        opacity: 0.8;
+    }}
+
+    /* Video Overlay */
+    .video-overlay {{
+        display: flex;
+        justify-content: center;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        border-radius: 12px;
+        overflow: hidden;
+        background: transparent;
+    }}
+    .video-overlay video {{
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }}
+
+    /* Popup Menu Styles */
+    .popup-menu-overlay {{
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.6);
+        backdrop-filter: blur(8px);
+        display: none;
+        z-index: 2000;
+        justify-content: center;
+        align-items: center;
+    }}
+    .popup-menu-content {{
+        background: rgba(255, 255, 255, 0.95);
+        padding: 2rem;
+        border-radius: 20px;
+        width: 80%;
+        max-width: 400px;
+        box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+    }}
+    .popup-menu-content ul {{
+        list-style: none;
+        padding: 0;
+        margin: 0 0 1.5rem 0;
+    }}
+    .popup-menu-content li {{
+        margin-bottom: 0.75rem;
+    }}
+    .popup-menu-content a {{
+        display: block;
+        padding: 1rem;
+        background: #4F46E5;
+        color: white;
+        text-decoration: none;
+        border-radius: 12px;
+        text-align: center;
+        font-weight: 600;
+        transition: transform 0.2s;
+    }}
+    .popup-menu-content a:active {{
+        transform: scale(0.95);
+    }}
+    .close-menu {{
+        width: 100%;
+        padding: 0.75rem;
+        background: #E5E7EB;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+    }}
+
+    .nav-btn:hover, .home-btn:hover {{ transform: scale(1.1); opacity: 0.8; }}
+
+    .nav-prev {{ left: 0; {arrow_v} }}
+    .nav-next {{ right: 0; {arrow_v} }}
+    .home-btn {{ {home_v} font-size: 1.5rem; font-weight: 500; }}
+    .nav-btn:not([style*="display: none"]) {{ font-size: 2.5rem; }}
+
+    /* Transitions */
+    @keyframes fadeInScale {{
+        from {{ opacity: 0; transform: scale(0.97); }}
+        to {{ opacity: 1; transform: scale(1); }}
+    }}
+    .animate-fade {{
+        animation: fadeInScale 0.6s cubic-bezier(0.25, 1, 0.5, 1) both;
+    }}
+    """)
+        with open(js_dir / "control.js", "w") as f:
+            f.write("""
+    function toggleMenu(id) {
+        var menu = document.getElementById(id);
+        if (menu.style.display === 'flex') {
+            menu.style.display = 'none';
+        } else {
+            menu.style.display = 'flex';
+        }
     }
-    arrow_v = _arrow_v_map.get(nav_arrows_position, _arrow_v_map['bottom'])
-
-    # Add dummy/template CSS and JS files
-    with open(css_dir / "style.css", "w") as f:
-        f.write(f"""/* Detailing Aid Styles */
-body, html {{ margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; font-family: -apple-system, sans-serif; }}
-#aspect-ratio-container {{ 
-    position: relative; width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; background: #fff;
-}}
-#slideCover {{ position: relative; display: inline-block; max-width: 100%; max-height: 100%; }}
-.slide-bg {{ max-width: 100vw; max-height: 100vh; display: block; }}
-
-/* Navigation Buttons */
-.nav-btn, .home-btn {{
-    position: absolute;
-    z-index: 100;
-    text-decoration: none;
-    color: white;
-    font-size: 14px;
-    font-weight: bold;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-    background: transparent;
-    padding: 10px;
-    display: flex; align-items: center; justify-content: center;
-    transition: transform 0.2s, opacity 0.2s;
-}}
-.home-btn:hover {{
-    opacity: 0.8;
-}}
-
-/* Video Overlay */
-.video-overlay {{
-    display: flex;
-    justify-content: center;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-    border-radius: 12px;
-    overflow: hidden;
-    background: transparent;
-}}
-.video-overlay video {{
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}}
-
-/* Popup Menu Styles */
-.popup-menu-overlay {{
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.6);
-    backdrop-filter: blur(8px);
-    display: none;
-    z-index: 2000;
-    justify-content: center;
-    align-items: center;
-}}
-.popup-menu-content {{
-    background: rgba(255, 255, 255, 0.95);
-    padding: 2rem;
-    border-radius: 20px;
-    width: 80%;
-    max-width: 400px;
-    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-}}
-.popup-menu-content ul {{
-    list-style: none;
-    padding: 0;
-    margin: 0 0 1.5rem 0;
-}}
-.popup-menu-content li {{
-    margin-bottom: 0.75rem;
-}}
-.popup-menu-content a {{
-    display: block;
-    padding: 1rem;
-    background: #4F46E5;
-    color: white;
-    text-decoration: none;
-    border-radius: 12px;
-    text-align: center;
-    font-weight: 600;
-    transition: transform 0.2s;
-}}
-.popup-menu-content a:active {{
-    transform: scale(0.95);
-}}
-.close-menu {{
-    width: 100%;
-    padding: 0.75rem;
-    background: #E5E7EB;
-    border: none;
-    border-radius: 12px;
-    font-weight: 600;
-    cursor: pointer;
-}}
-
-.nav-btn:hover, .home-btn:hover {{ transform: scale(1.1); opacity: 0.8; }}
-
-.nav-prev {{ left: 0; {arrow_v} }}
-.nav-next {{ right: 0; {arrow_v} }}
-.home-btn {{ {home_v} font-size: 1.5rem; font-weight: 500; }}
-.nav-btn:not([style*="display: none"]) {{ font-size: 2.5rem; }}
-
-/* Transitions */
-@keyframes fadeInScale {{
-    from {{ opacity: 0; transform: scale(0.97); }}
-    to {{ opacity: 1; transform: scale(1); }}
-}}
-.animate-fade {{
-    animation: fadeInScale 0.6s cubic-bezier(0.25, 1, 0.5, 1) both;
-}}
-""")
-    with open(js_dir / "control.js", "w") as f:
-        f.write("""
-function toggleMenu(id) {
-    var menu = document.getElementById(id);
-    if (menu.style.display === 'flex') {
-        menu.style.display = 'none';
-    } else {
-        menu.style.display = 'flex';
-    }
-}
-""")
-    with open(js_dir / "jquery.min.js", "w") as f:
-        f.write("// jQuery min")
-        
-    project_type = project.get('type', '').lower()
-    if project_type in ['pdf']:
-        # Rename logic and building HTML
-        # Convert new_pages list to a map dict
-        rename_map = {p['id']: p.get('new_html_name', p.get('html_name')) for p in new_pages}
-        frontend_state_map = {p['id']: p for p in new_pages}
-        
-        for i, page in enumerate(project['pages']):
-            new_html_name = rename_map.get(page['id'], page['html_name'])
-            image_name = page['image_name']
+    """)
+        with open(js_dir / "jquery.min.js", "w") as f:
+            f.write("// jQuery min")
             
-            # Use real image if it exists
-            src_image = project_dir / "images" / image_name
-            if src_image.exists():
-                shutil.copy(src_image, images_build_dir / image_name)
+        project_type = project.get('type', '').lower()
+        if project_type in ['pdf']:
+            # Rename logic and building HTML
+            # Convert new_pages list to a map dict
+            rename_map = {p['id']: p.get('new_html_name', p.get('html_name')) for p in new_pages}
+            frontend_state_map = {p['id']: p for p in new_pages}
             
-            # Previous file name
-            prev_html_name = ""
-            if i - 1 >= 0:
-                prev_id = project['pages'][i-1]['id']
-                prev_html_name = rename_map.get(prev_id, project['pages'][i-1]['html_name'])
+            for i, page in enumerate(project['pages']):
+                new_html_name = rename_map.get(page['id'], page['html_name'])
+                image_name = page['image_name']
                 
-            # Next file name
-            next_html_name = ""
-            if i + 1 < len(project['pages']):
-                next_id = project['pages'][i+1]['id']
-                next_html_name = rename_map.get(next_id, project['pages'][i+1]['html_name'])
+                # Use real image if it exists
+                src_image = project_dir / "images" / image_name
+                if src_image.exists():
+                    shutil.copy(src_image, images_build_dir / image_name)
                 
-            video_name = page.get('video_name', '')
-            if video_name:
-                src_video = project_dir / "media" / video_name
-                if src_video.exists():
-                    shutil.copy(src_video, media_build_dir / video_name)
+                # Previous file name
+                prev_html_name = ""
+                if i - 1 >= 0:
+                    prev_id = project['pages'][i-1]['id']
+                    prev_html_name = rename_map.get(prev_id, project['pages'][i-1]['html_name'])
                     
-            # Grab dimensions and interaction hotspots from the frontend state payload
-            frontend_page = frontend_state_map.get(page['id'], {})
-            v_top = frontend_page.get('video_top', 10)
-            v_left = frontend_page.get('video_left', 10)
-            v_width = frontend_page.get('video_width', 80)
-            v_height = frontend_page.get('video_height', 80)
-            hotspots = frontend_page.get('hotspots', [])
-
-            html_content = get_base_html(image_name, prev_html_name, next_html_name, video_name, v_top, v_left, v_width, v_height, hotspots, home_position)
-            
-            with open(build_dir / new_html_name, "w") as f:
-                f.write(html_content)
-                
-    elif project_type in ['zip']:
-        # For ZIP, rename files in the extracted directory
-        # This is a bit more complex (refs need rewriting).
-        # We will just copy the extracted items and rename the requested files.
-        extracted_dir = project_dir / "extracted"
-        shutil.copytree(extracted_dir, build_dir, dirs_exist_ok=True)
-        rename_map = {p['id']: p.get('new_html_name', p.get('html_name')) for p in new_pages}
-        
-        for root, dirs, files in os.walk(build_dir):
-            for name in files:
-                if name in rename_map and rename_map[name] != name:
-                    os.rename(os.path.join(root, name), os.path.join(root, rename_map[name]))
+                # Next file name
+                next_html_name = ""
+                if i + 1 < len(project['pages']):
+                    next_id = project['pages'][i+1]['id']
+                    next_html_name = rename_map.get(next_id, project['pages'][i+1]['html_name'])
                     
-        # Update references in all HTML using BS4. This is a naive implementation but works for simple simulation.
-        for root, dirs, files in os.walk(build_dir):
-            for name in files:
-                if name.endswith(".html"):
-                    html_file = os.path.join(root, name)
-                    with open(html_file, 'r', encoding='utf-8') as f:
-                        soup = BeautifulSoup(f, 'html.parser')
-                    for a in soup.find_all('a'):
-                        href = a.get('href', '')
-                        if href in rename_map:
-                            a['href'] = rename_map[href]
-                    with open(html_file, 'w', encoding='utf-8') as f:
-                        f.write(str(soup))
+                video_name = page.get('video_name', '')
+                if video_name:
+                    src_video = project_dir / "media" / video_name
+                    if src_video.exists():
+                        shutil.copy(src_video, media_build_dir / video_name)
+                        
+                # Grab dimensions and interaction hotspots from the frontend state payload
+                frontend_page = frontend_state_map.get(page['id'], {})
+                v_top = frontend_page.get('video_top', 10)
+                v_left = frontend_page.get('video_left', 10)
+                v_width = frontend_page.get('video_width', 80)
+                v_height = frontend_page.get('video_height', 80)
+                hotspots = frontend_page.get('hotspots', [])
 
-        # ZIP it up
-        shutil.make_archive(str(project_dir / "output"), 'zip', build_dir)
-        
-        # Persist the updated hotspots/state
-        projects_db[project_id]['pages'] = new_pages
-        projects_db[project_id]['nav_arrows_position'] = nav_arrows_position
-        projects_db[project_id]['home_position'] = home_position
-        save_db()
+                html_content = get_base_html(image_name, prev_html_name, next_html_name, video_name, v_top, v_left, v_width, v_height, hotspots, home_position)
+                
+                with open(build_dir / new_html_name, "w") as f:
+                    f.write(html_content)
+                    
+        elif project_type in ['zip']:
+            # For ZIP, rename files in the extracted directory
+            # This is a bit more complex (refs need rewriting).
+            # We will just copy the extracted items and rename the requested files.
+            extracted_dir = project_dir / "extracted"
+            shutil.copytree(extracted_dir, build_dir, dirs_exist_ok=True)
+            rename_map = {p['id']: p.get('new_html_name', p.get('html_name')) for p in new_pages}
+            
+            for root, dirs, files in os.walk(build_dir):
+                for name in files:
+                    if name in rename_map and rename_map[name] != name:
+                        os.rename(os.path.join(root, name), os.path.join(root, rename_map[name]))
+                        
+            # Update references in all HTML using BS4. This is a naive implementation but works for simple simulation.
+            for root, dirs, files in os.walk(build_dir):
+                for name in files:
+                    if name.endswith(".html"):
+                        html_file = os.path.join(root, name)
+                        with open(html_file, 'r', encoding='utf-8') as f:
+                            soup = BeautifulSoup(f, 'html.parser')
+                        for a in soup.find_all('a'):
+                            href = a.get('href', '')
+                            if href in rename_map:
+                                a['href'] = rename_map[href]
+                        with open(html_file, 'w', encoding='utf-8') as f:
+                            f.write(str(soup))
 
-        return {"download_url": f"/download/{project_id}"}
+            # ZIP it up
+            shutil.make_archive(str(project_dir / "output"), 'zip', build_dir)
+            
+            # Persist the updated hotspots/state
+            projects_db[project_id]['pages'] = new_pages
+            projects_db[project_id]['nav_arrows_position'] = nav_arrows_position
+            projects_db[project_id]['home_position'] = home_position
+            save_db()
+
+            return {"download_url": f"/download/{project_id}"}
+
     except Exception as e:
         import traceback
         print(traceback.format_exc())
@@ -651,4 +665,5 @@ async def download_project(project_id: str):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=True)
