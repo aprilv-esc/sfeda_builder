@@ -307,15 +307,21 @@ export class AppComponent implements OnInit {
   replicateHotspot(hotspot: any, targetPageIds: string[] | 'all') {
     if (!hotspot) return;
     
-    let targets = [];
+    let targets: string[] = [];
     if (targetPageIds === 'all') {
       targets = this.pages.map(p => p.id);
     } else {
       targets = targetPageIds;
     }
 
+    if (targets.length === 0) {
+      alert("No slides selected. Please check at least one slide.");
+      return;
+    }
+
     this.pages.forEach(p => {
-      if (targets.includes(p.id)) {
+      if (targets.includes(p.id) && p.id !== this.activeModalPage?.id) {
+        // ... (rest of logic same)
         // Avoid self-replication or duplicate replication based on type+pos
         const alreadyHas = p.hotspots.some((h: any) => 
           h.type === hotspot.type && h.top === hotspot.top && h.left === hotspot.left);
@@ -336,6 +342,27 @@ export class AppComponent implements OnInit {
     alert(`Hotspot replicated to ${targets.length === this.pages.length ? 'all' : targets.length} slides.`);
   }
 
+  getSelectedPageIds(hi: number): string[] {
+    const ids: string[] = [];
+    this.pages.forEach((p, index) => {
+      const el = document.getElementById(`check-${hi}-${p.id}`) as HTMLInputElement;
+      if (el && el.checked) {
+        ids.push(p.id);
+      }
+    });
+    return ids;
+  }
+
+  clearVideo(page: any) {
+    if (confirm("Clear video position and attached file?")) {
+      page.video_name = null;
+      page.video_top = null;
+      page.video_left = null;
+      page.video_width = null;
+      page.video_height = null;
+    }
+  }
+
   deleteHotspot(page: any, hotspot: any) {
     page.hotspots = page.hotspots.filter((h: any) => h.id !== hotspot.id);
   }
@@ -343,6 +370,10 @@ export class AppComponent implements OnInit {
   addMenuItem(hotspot: any) {
     if (!hotspot.menuItems) hotspot.menuItems = [];
     hotspot.menuItems.push({ label: 'New Item', target: '' });
+  }
+
+  removeMenuItem(hotspot: any, index: number) {
+    hotspot.menuItems.splice(index, 1);
   }
 
   removeMenuItem(hotspot: any, index: number) {

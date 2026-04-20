@@ -110,6 +110,8 @@
               <div>Width:<br><input type="number" [(ngModel)]="page.video_width" style="width:100%; padding: 0.25rem; border-radius: 4px; border: 1px solid var(--border);" placeholder="Width %"></div>
               <div>Height:<br><input type="number" [(ngModel)]="page.video_height" style="width:100%; padding: 0.25rem; border-radius: 4px; border: 1px solid var(--border);" placeholder="Height %"></div>
             </div>
+            
+            <button (click)="clearVideo(page)" style="margin-top: 0.5rem; background: none; border: none; color: #EF4444; cursor: pointer; font-size: 0.75rem; text-decoration: underline;">Clear Selection (Reset)</button>
           </div>
           
           <button class="btn btn-secondary maximize-btn" style="width: 100%; margin-top: 1rem; padding: 0.5rem; font-size: 0.8rem; border-color: var(--primary); color: var(--primary);" (click)="openModal(page)">
@@ -138,7 +140,7 @@
                     <input type="checkbox" #slideCheck [id]="'check-'+hi+'-'+p.id" [disabled]="p.id === page.id">
                     <label [for]="'check-'+hi+'-'+p.id">{{ p.new_html_name }}</label>
                   </div>
-                  <button (click)="replicateHotspot(h, [])" class="btn btn-secondary" style="width: 100%; font-size: 0.75rem; padding: 2px; margin-top: 0.5rem; border-color: var(--primary); color: var(--primary);">
+                  <button (click)="replicateHotspot(h, getSelectedPageIds(hi))" class="btn btn-secondary" style="width: 100%; font-size: 0.75rem; padding: 2px; margin-top: 0.5rem; border-color: var(--primary); color: var(--primary);">
                     Apply to Selected
                   </button>
                   <p style="font-size: 0.65rem; color: #666; margin-top: 0.25rem;">* Note: This will sync the position to the target slides.</p>
@@ -234,7 +236,19 @@
         <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 0.75rem;" [style.background]="drawingMode === 'menu' ? '#8B5CF6' : ''" (click)="drawingMode = 'menu'">☰ Menu</button>
       </div>
     </div>
-    <button class="btn" style="background: #10B981; padding: 0.5rem 1.5rem;" (click)="closeModal()">Save & Close</button>
+    <div style="display: flex; gap: 1rem;">
+      <button class="btn" style="background: #EF4444; font-size: 0.8rem; padding: 0.5rem 1rem;" (click)="activeModalPage.hotspots = []; activeModalPage.video_width = 0; activeModalPage.video_height = 0;">Clear All on this Page</button>
+      <button class="btn" style="background: #10B981; padding: 0.5rem 1.5rem;" (click)="closeModal()">Save & Close</button>
+    </div>
+  </div>
+  
+  <div style="width: 90vw; color: #ddd; font-size: 0.8rem; margin-bottom: 0.5rem;">
+    * <strong>Active on this page:</strong> 
+    <span *ngIf="activeModalPage.video_width" style="margin-right: 0.5rem; color: #f87171;">● Video Box</span>
+    <span *ngFor="let h of activeModalPage.hotspots" style="margin-right: 0.5rem;" [style.color]="h.type === 'home' ? '#10B981' : h.type === 'nav' ? '#f59e0b' : '#8B5CF6'">
+      ● {{ h.type === 'home' ? 'Home' : h.type === 'nav' ? 'Slide' : 'Menu' }}
+      <span (click)="deleteHotspot(activeModalPage, h)" style="cursor: pointer; text-decoration: underline; font-size: 0.7rem; margin-left: 2px;">(x)</span>
+    </span>
   </div>
   
   <div style="position: relative; display: inline-block; max-width: 90vw; max-height: 80vh; background: #fff; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border-radius: 8px; overflow: hidden; user-select: none; cursor: crosshair;"
