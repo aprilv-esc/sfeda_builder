@@ -18,6 +18,8 @@ projects_db = {}
 
 # Common paths
 STORAGE_DIR = Path("/app/storage") if os.path.exists("/app") else Path("storage")
+# MUST create directory before mounting StaticFiles to prevent startup crash
+STORAGE_DIR.mkdir(parents=True, exist_ok=True)
 DB_FILE = STORAGE_DIR / "projects.json"
 TEMPLATES_DIR = Path(__file__).parent / "templates"
 
@@ -69,8 +71,7 @@ def load_db():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: Ensure directory and data exist
-    STORAGE_DIR.mkdir(parents=True, exist_ok=True)
+    # Startup: Already created STORAGE_DIR, now load DB
     load_db()
     yield
 
@@ -103,7 +104,7 @@ async def global_exception_handler(request, exc):
 def read_root():
     return {
         "status": "ok", 
-        "version": "1.0.6-resilient-v2", 
+        "version": "1.0.6-resilient-v3", 
         "message": "DA Converter API is running with SFE compliance."
     }
 
