@@ -73,7 +73,7 @@ app.mount("/storage", StaticFiles(directory=STORAGE_DIR), name="storage")
 
 @app.get("/")
 def read_root():
-    return {"status": "ok", "message": "DA Converter API is running."}
+    return {"status": "ok", "message": "DA Converter API is online. Ensure Railway PORT is set to 8080 in Settings."}
 
 # DB Persistence
 projects_db = {}
