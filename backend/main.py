@@ -11,37 +11,13 @@ from pathlib import Path
 import re
 from PIL import Image, ImageDraw, ImageFont
 from typing import List, Dict, Any
+from contextlib import asynccontextmanager
 
-# HEAVY IMPORTS MOVED TO FUNCTIONS FOR STARTUP STABILITY
+# DB Persistence
+projects_db = {}
 
-app = FastAPI(title="Detailing Aid Converter API")
-
-# CORS MUST BE FIRST
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False, 
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-@app.exception_handler(Exception)
-async def global_exception_handler(request, exc):
-    import traceback
-    error_msg = f"Unhandled error: {str(exc)}\n{traceback.format_exc()}"
-    print(error_msg)
-    return JSONResponse(
-        status_code=500,
-        content={"detail": "Internal Server Error", "error": str(exc)},
-        headers={
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "*",
-            "Access-Control-Allow-Headers": "*"
-        }
-    )
-
+# Common paths
 STORAGE_DIR = Path("/app/storage") if os.path.exists("/app") else Path("storage")
-STORAGE_DIR.mkdir(parents=True, exist_ok=True)
 DB_FILE = STORAGE_DIR / "projects.json"
 TEMPLATES_DIR = Path(__file__).parent / "templates"
 
@@ -72,63 +48,64 @@ def ensure_templates():
         SFE_JQUERY = load_template("js/jquery.min.js")
         SFE_TRACKING = load_template("js/tracking.js")
 
+def load_db():
+    global projects_db
+    try:
+        if DB_FILE.exists() and DB_FILE.stat().st_size > 0:
+            with open(DB_FILE, "r") as f:
+                content = f.read().strip()
+                if content:
+                    projects_db = json.loads(content)
+                    # Sanitize: Ensure hotspots and required fields exist
+                    for pid, data in projects_db.items():
+                        if 'pages' in data:
+                            for page in data['pages']:
+                                if 'hotspots' not in page: page['hotspots'] = []
+                                for key in ['video_top', 'video_left', 'video_width', 'video_height']:
+                                    if key not in page: page[key] = 0
+    except Exception as e:
+        print(f"Non-critical: Failed to load DB: {e}")
+        projects_db = {}
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Ensure directory and data exist
+    STORAGE_DIR.mkdir(parents=True, exist_ok=True)
+    load_db()
+    yield
+
+app = FastAPI(title="Detailing Aid Converter API", lifespan=lifespan)
+
 # Mount the storage directory
 app.mount("/storage", StaticFiles(directory=STORAGE_DIR), name="storage")
+
+# CORS MUST BE FIRST
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False, 
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request, exc):
+    import traceback
+    error_msg = f"Unhandled error: {str(exc)}\n{traceback.format_exc()}"
+    print(error_msg)
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal Server Error", "error": str(exc)},
+        headers={"Access-Control-Allow-Origin": "*"}
+    )
 
 @app.get("/")
 def read_root():
     return {
         "status": "ok", 
-        "version": "1.0.5-resilient", 
+        "version": "1.0.6-resilient-v2", 
         "message": "DA Converter API is running with SFE compliance."
     }
-
-# DB Persistence
-projects_db = {}
-
-def save_db():
-    try:
-        # Convert Path objects to strings for JSON serialization
-        serializable_db = {}
-        for pid, data in projects_db.items():
-            serializable_db[pid] = data.copy()
-            if 'pages' in serializable_db[pid]:
-                # Deep copy to avoid mutating the original
-                serializable_db[pid]['pages'] = json.loads(json.dumps(data['pages']))
-        
-        with open(DB_FILE, "w") as f:
-            json.dump(serializable_db, f, indent=4)
-    except Exception as e:
-        print(f"Error saving DB: {e}")
-
-def load_db():
-    global projects_db
-    if DB_FILE.exists() and DB_FILE.stat().st_size > 0:
-        try:
-            with open(DB_FILE, "r") as f:
-                content = f.read().strip()
-                if not content:
-                    projects_db = {}
-                    return
-                projects_db = json.loads(content)
-                # Sanitize: Ensure hotspots and required fields exist for all pages
-                for pid, data in projects_db.items():
-                    if 'pages' in data:
-                        for page in data['pages']:
-                            if 'hotspots' not in page:
-                                page['hotspots'] = []
-                            # ... defaults
-                            for key in ['video_top', 'video_left', 'video_width', 'video_height']:
-                                if key not in page:
-                                    page[key] = 0
-        except Exception as e:
-            print(f"Critical error loading DB: {e}")
-            projects_db = {}
-    else:
-        projects_db = {}
-
-# Initialize DB on start
-load_db()
 
 @app.get("/projects")
 async def list_projects():
@@ -635,9 +612,4 @@ async def download_project(project_id: str):
         
     return FileResponse(output_zip, media_type="application/zip", filename=download_name)
 
-if __name__ == "__main__":
-    import uvicorn
-    # Use the port assigned by Railway
-    port = int(os.environ.get("PORT", 8080))
-    # Disable reload for production stability
-    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False)
+
