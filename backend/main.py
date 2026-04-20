@@ -245,49 +245,44 @@ def get_base_html(image_filename, prev_filename="", next_filename="", video_file
                 </div>
                 """
 
-    html_template = """<!DOCTYPE html>
-<html>
+    head_tag = """
     <head>
         <title>Detailing Aid Slide</title>
-        <style>
-[[STYLE]]
-        </style>
-        <script type="text/javascript">
-            // SFE DIAGNOSTIC: Show error if script fails
-            window.onerror = function(msg, url, line) {
-                alert("SFE Error: " + msg + " at " + url + ":" + line);
-            };
-[[JQUERY]]
-        </script>
-        <script type="text/javascript">
-[[TRACKING_SCRIPT]]
-        </script>
+        <!-- Build v20-April-C -->
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+        <link rel="stylesheet" type="text/css" href="css/style.css" />
     </head>
-    <body>
-        <div id="gameContainer">
-            <div id="aspect-ratio-container">
-                <div id="slideCover">
-                    <img src="./images/[[IMAGE]]" data-next-file="[[NEXT]]" data-previous-file="[[PREV]]"/>
-                    [[VIDEO_EMBED]]
-                    [[HOTSPOT_HTML]]
-                </div>
-                <div class="sfe-safe-zone"></div>
+"""
+
+    html_template = f"""<!DOCTYPE html>
+<html>
+    {head_tag}
+    <body id="top">
+        <main id="aspect-ratio-container" class="animate-fade">
+            [[NAV_PREV]]
+            [[NAV_NEXT]]
+            [[HOME_LINK]]
+            <div id="slideCover">
+                <img class="slide-bg" src="images/[[IMAGE]]" data-next-file="[[NEXT]]" data-previous-file="[[PREV]]"/>
+                [[VIDEO_EMBED]]
+                [[HOTSPOT_HTML]]
             </div>
-            [[MENU_OVERLAYS]]
-        </div>
-        <script type="text/javascript">
-[[CONTROL]]
-        </script>
+            <div class="sfe-safe-zone"></div>
+        </main>
+        [[MENU_OVERLAYS]]
+        <script type="text/javascript" src="js/jquery.min.js"></script>
+        <script type="text/javascript" src="js/tracking.js"></script>
+        <script type="text/javascript" src="js/control.js"></script>
     </body>
 </html>"""
 
-    html = html_template.replace("[[STYLE]]", SFE_STYLE)
-    html = html.replace("[[JQUERY]]", SFE_JQUERY)
-    html = html.replace("[[TRACKING_SCRIPT]]", SFE_TRACKING)
-    html = html.replace("[[CONTROL]]", SFE_CONTROL)
-    html = html.replace("[[IMAGE]]", image_filename)
+    html = html_template.replace("[[IMAGE]]", image_filename)
     html = html.replace("[[NEXT]]", next_filename if next_filename else "")
     html = html.replace("[[PREV]]", prev_filename if prev_filename else "")
+    html = html.replace("[[NAV_PREV]]", f'<a href="{prev_filename}" class="nav-btn nav-prev">&#10094;</a>' if prev_filename else "")
+    html = html.replace("[[NAV_NEXT]]", f'<a href="{next_filename}" class="nav-btn nav-next">&#10095;</a>' if next_filename else "")
+    html = html.replace("[[HOME_LINK]]", f'<a href="index.html" class="home-btn" style="{"display:none" if home_position == "none" else ""}"><span>&#8962; Home</span></a>')
+    
     html = html.replace("[[VIDEO_EMBED]]", video_embed)
     html = html.replace("[[HOTSPOT_HTML]]", hotspot_html)
     html = html.replace("[[MENU_OVERLAYS]]", menu_overlays)
@@ -447,6 +442,10 @@ async def generate_project(project_id: str, body: Dict[str, Any]):
         build_dir.mkdir(exist_ok=True)
         images_build_dir = build_dir / "images"
         images_build_dir.mkdir(exist_ok=True)
+        js_dir = build_dir / "js"
+        js_dir.mkdir(exist_ok=True)
+        css_dir = build_dir / "css"
+        css_dir.mkdir(exist_ok=True)
         media_build_dir = build_dir / "media"
         media_build_dir.mkdir(exist_ok=True)
             # Build nav arrow CSS (vertical position)
@@ -477,7 +476,15 @@ async def generate_project(project_id: str, body: Dict[str, Any]):
         }
         arrow_v = _arrow_v_map.get(nav_arrows_position, _arrow_v_map['bottom'])
 
-        # Added CamelCase naming enforcement and removed separate JS/CSS folder creation
+        # Restore file writes for JS and CSS files
+        with open(css_dir / "style.css", "w", encoding='utf-8', errors='replace') as f:
+            f.write(SFE_STYLE)
+        with open(js_dir / "control.js", "w", encoding='utf-8', errors='replace') as f:
+            f.write(SFE_CONTROL)
+        with open(js_dir / "jquery.min.js", "w", encoding='utf-8', errors='replace') as f:
+            f.write(SFE_JQUERY)
+        with open(js_dir / "tracking.js", "w", encoding='utf-8', errors='replace') as f:
+            f.write(SFE_TRACKING)
             
         project_type = project.get('type', '').lower()
         if project_type in ['pdf']:
