@@ -2,7 +2,8 @@
   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
     <h1>Detailing Aid Builder</h1>
     <div>
-      <button *ngIf="projectId" class="btn btn-secondary" style="margin-right: 1rem;" (click)="resetApp()">Start Over</button>
+      <button class="btn btn-secondary" style="margin-right: 1rem;" (click)="projectId = null; resetApp(); loadRecentProjects()">← Back to Projects</button>
+      <button *ngIf="projectId" class="btn btn-secondary" style="margin-right: 1rem;" (click)="resetApp()">Clear Slide Data</button>
       <button id="tour-help" class="btn btn-secondary" (click)="startTour()">Help & Tour</button>
     </div>
   </div>
@@ -16,9 +17,13 @@
     <div style="border: 2px dashed var(--border); border-radius: 12px; padding: 3rem; text-align: center; background: var(--bg);">
       <input type="file" (change)="onFileChange($event)" accept=".pdf,.zip" id="fileInput" style="display: none;" />
       
-      <label for="fileInput" class="btn" style="margin-bottom: 1rem;">
-        Browse File
-      </label>
+      <div style="margin-top: 2rem;" *ngIf="fileToUpload">
+        <button class="btn" (click)="uploadFile()" [disabled]="isUploading" style="width: 100%;">
+          {{ isUploading ? 'Processing...' : 'Upload & Process' }}
+        </button>
+      </div>
+    </div>
+  </div>
       
       <div *ngIf="fileToUpload" style="font-weight: 500; color: var(--primary);">
         Selected: {{ fileToUpload.name }}
@@ -28,10 +33,30 @@
         {{ uploadError }}
       </div>
       
-      <div style="margin-top: 2rem;" *ngIf="fileToUpload">
-        <button class="btn" (click)="uploadFile()" [disabled]="isUploading" style="width: 100%;">
-          {{ isUploading ? 'Processing...' : 'Upload & Process' }}
-        </button>
+    </div>
+  </div>
+
+  <div *ngIf="!projectId && recentProjects.length > 0" class="animate-fade-in" style="margin-top: 2rem;">
+    <h2 style="margin-bottom: 1rem;">Recent Projects</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+      <div *ngFor="let p of recentProjects" class="card" style="padding: 1rem; cursor: pointer; transition: transform 0.2s; position: relative;" (click)="selectProject(p)">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+          <div style="flex: 1;">
+            <div style="font-weight: bold; font-size: 1rem; color: var(--primary); margin-bottom: 0.25rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+              {{ p.original_file }}
+            </div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">
+              {{ p.page_count }} slides • {{ p.timestamp | date:'MMM d, y, h:mm a' }}
+            </div>
+          </div>
+          <button class="btn-icon" style="color: #EF4444; padding: 4px; background: transparent; border: none; cursor: pointer;" (click)="deleteProject(p.id, $event)">
+            🗑️
+          </button>
+        </div>
+        <div style="margin-top: 1rem; font-size: 0.8rem; font-weight: 600; color: var(--secondary); display: flex; align-items: center; gap: 0.5rem;">
+          <span>Open Project</span>
+          <span>→</span>
+        </div>
       </div>
     </div>
   </div>

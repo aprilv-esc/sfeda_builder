@@ -36,8 +36,70 @@ app.mount("/storage", StaticFiles(directory=STORAGE_DIR), name="storage")
 def read_root():
     return {"status": "ok", "message": "DA Converter API is running."}
 
-# DB mock dictionary for testing
+# DB Persistence
+DB_FILE = STORAGE_DIR / "projects.json"
 projects_db = {}
+
+def save_db():
+    try:
+        # Convert Path objects to strings for JSON serialization
+        serializable_db = {}
+        for pid, data in projects_db.items():
+            serializable_db[pid] = data.copy()
+            if 'pages' in serializable_db[pid]:
+                # Deep copy to avoid mutating the original
+                serializable_db[pid]['pages'] = json.loads(json.dumps(data['pages']))
+        
+        with open(DB_FILE, "w") as f:
+            json.dump(serializable_db, f, indent=4)
+    except Exception as e:
+        print(f"Error saving DB: {e}")
+
+def load_db():
+    global projects_db
+    if DB_FILE.exists():
+        try:
+            with open(DB_FILE, "r") as f:
+                projects_db = json.load(f)
+        except Exception as e:
+            print(f"Error loading DB: {e}")
+            projects_db = {}
+
+# Initialize DB on start
+load_db()
+
+@app.get("/projects")
+async def list_projects():
+    summary = []
+    for pid, data in projects_db.items():
+        summary.append({
+            "id": pid,
+            "original_file": data.get("original_file"),
+            "type": data.get("type"),
+            "page_count": len(data.get("pages", [])),
+            "timestamp": data.get("timestamp")
+        })
+    # Sort by timestamp descending
+    summary.sort(key=lambda x: x.get('timestamp', ''), reverse=True)
+    return summary
+
+@app.get("/project/{project_id}")
+async def get_project(project_id: str):
+    if project_id not in projects_db:
+        raise HTTPException(status_code=404, detail="Project not found")
+    return projects_db[project_id]
+
+@app.delete("/project/{project_id}")
+async def delete_project(project_id: str):
+    if project_id in projects_db:
+        # Optionally delete files too
+        project_dir = STORAGE_DIR / project_id
+        if project_dir.exists():
+            shutil.rmtree(project_dir)
+        del projects_db[project_id]
+        save_db()
+        return {"status": "deleted"}
+    raise HTTPException(status_code=404, detail="Project not found")
 
 def generate_filename(text: str, default: str, used_names: set) -> str:
     if not text:
@@ -236,7 +298,15 @@ async def upload_file(file: UploadFile = File(...)):
     else:
         raise HTTPException(status_code=400, detail="Unsupported file format.")
         
-    projects_db[project_id] = {"pages": pages, "original_file": file.filename, "type": file.filename.split('.')[-1]}
+    import datetime
+    projects_db[project_id] = {
+        "id": project_id,
+        "pages": pages, 
+        "original_file": file.filename, 
+        "type": file.filename.split('.')[-1].lower(),
+        "timestamp": datetime.datetime.now().isoformat()
+    }
+    save_db()
     
     return {"project_id": project_id, "pages": pages}
 
@@ -256,6 +326,7 @@ async def upload_slide_media(project_id: str, slide_id: str, file: UploadFile = 
     for page in project['pages']:
         if page['id'] == slide_id:
             page['video_name'] = file.filename
+    save_db()
             break
             
     return {"status": "success", "video_name": file.filename}
@@ -518,6 +589,12 @@ function toggleMenu(id) {
     # ZIP it up
     shutil.make_archive(str(project_dir / "output"), 'zip', build_dir)
     
+    # Persist the updated hotspots/state
+    projects_db[project_id]['pages'] = new_pages
+    projects_db[project_id]['nav_arrows_position'] = nav_arrows_position
+    projects_db[project_id]['home_position'] = home_position
+    save_db()
+
     return {"download_url": f"/download/{project_id}"}
 
 

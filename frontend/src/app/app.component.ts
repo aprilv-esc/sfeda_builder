@@ -27,8 +27,10 @@ export class AppComponent implements OnInit {
   activeModalPage: any = null;
 
   // Global nav positioning settings
-  navArrowsPosition: string = 'bottom';  // 'top' | 'middle' | 'bottom'
-  homePosition: string = 'top-right';    // 'top-left' | 'top-right'
+  navArrowsPosition: string = 'none';  // 'top' | 'middle' | 'bottom' | 'none'
+  homePosition: string = 'none';       // 'top-left' | 'top-right' | 'none'
+  
+  recentProjects: any[] = [];
   
   // New drawing state
   drawingMode: 'video' | 'home' | 'nav' | 'menu' = 'video';
@@ -39,10 +41,48 @@ export class AppComponent implements OnInit {
   constructor(private http: HttpClient) {}
 
   ngOnInit() {
+    this.loadRecentProjects();
     // Show tour if first time
     if (!localStorage.getItem('tour_seen')) {
       setTimeout(() => this.startTour(), 1000);
       localStorage.setItem('tour_seen', 'true');
+    }
+  }
+
+  loadRecentProjects() {
+    this.http.get<any[]>(`${this.API_BASE}/projects`).subscribe({
+      next: (data) => this.recentProjects = data,
+      error: (err) => console.error('Failed to load recent projects', err)
+    });
+  }
+
+  selectProject(projectSummary: any) {
+    this.http.get<any>(`${this.API_BASE}/project/${projectSummary.id}`).subscribe({
+      next: (project) => {
+        this.projectId = project.id;
+        this.pages = project.pages;
+        this.navArrowsPosition = project.nav_arrows_position || 'none';
+        this.homePosition = project.home_position || 'none';
+        this.downloadUrl = null;
+        // Scroll to management view
+        setTimeout(() => {
+          document.querySelector('#step2-manage')?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      },
+      error: (err) => alert('Failed to load project details.')
+    });
+  }
+
+  deleteProject(projectId: string, event: Event) {
+    event.stopPropagation();
+    if (confirm('Are you sure you want to delete this project?')) {
+      this.http.delete(`${this.API_BASE}/project/${projectId}`).subscribe(() => {
+        this.loadRecentProjects();
+        if (this.projectId === projectId) {
+          this.projectId = null;
+          this.pages = [];
+        }
+      });
     }
   }
 
