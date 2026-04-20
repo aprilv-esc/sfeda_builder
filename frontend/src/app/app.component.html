@@ -16,16 +16,9 @@
     
     <div style="border: 2px dashed var(--border); border-radius: 12px; padding: 3rem; text-align: center; background: var(--bg);">
       <input type="file" (change)="onFileChange($event)" accept=".pdf,.zip" id="fileInput" style="display: none;" />
+      <label for="fileInput" class="btn btn-secondary">Choose File</label>
       
-      <div style="margin-top: 2rem;" *ngIf="fileToUpload">
-        <button class="btn" (click)="uploadFile()" [disabled]="isUploading" style="width: 100%;">
-          {{ isUploading ? 'Processing...' : 'Upload & Process' }}
-        </button>
-      </div>
-    </div>
-  </div>
-      
-      <div *ngIf="fileToUpload" style="font-weight: 500; color: var(--primary);">
+      <div *ngIf="fileToUpload" style="font-weight: 500; color: var(--primary); margin-top: 1rem;">
         Selected: {{ fileToUpload.name }}
       </div>
       
@@ -33,6 +26,11 @@
         {{ uploadError }}
       </div>
       
+      <div style="margin-top: 2rem;" *ngIf="fileToUpload">
+        <button class="btn" (click)="uploadFile()" [disabled]="isUploading" style="width: 100%;">
+          {{ isUploading ? 'Processing...' : 'Upload & Process' }}
+        </button>
+      </div>
     </div>
   </div>
 
@@ -244,68 +242,56 @@
       <div *ngIf="downloadUrl" style="margin-top: 1rem; color: var(--secondary); font-weight: 500;">
         Successfully built! You can preview it natively, or make changes above and Re-Generate!
       </div>
-    </div>
-  </div>
-</div>
+    </div> <!-- End Card 3 -->
+  </div> <!-- End ProjectId -->
 
-<!-- High Precision Edit Modal -->
-<div *ngIf="activeModalPage" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
-  
-  <div style="width: 100%; max-width: 90vw; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
-    <div style="color: white; font-size: 1.25rem; font-weight: 600; display: flex; align-items: center; gap: 1rem;">
-      High-Precision Bounding Box Editor
-      <div style="display: flex; gap: 0.25rem; background: rgba(255,255,255,0.1); padding: 0.3rem; border-radius: 8px;">
-        <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 0.75rem;" [style.background]="drawingMode === 'video' ? 'var(--primary)' : ''" (click)="drawingMode = 'video'">📹 Video</button>
-        <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 0.75rem;" [style.background]="drawingMode === 'home' ? '#10B981' : ''" (click)="drawingMode = 'home'">⌂ Home</button>
-        <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 0.75rem;" [style.background]="drawingMode === 'nav' ? '#F59E0B' : ''" (click)="drawingMode = 'nav'">🔗 Slide</button>
-        <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 0.75rem;" [style.background]="drawingMode === 'menu' ? '#8B5CF6' : ''" (click)="drawingMode = 'menu'">☰ Menu</button>
+  <!-- Modal -->
+  <div *ngIf="activeModalPage" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+    <div style="width: 100%; max-width: 90vw; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+      <div style="color: white; font-size: 1.25rem; font-weight: 600; display: flex; align-items: center; gap: 1rem;">
+        High-Precision Bounding Box Editor
+        <div style="display: flex; gap: 0.25rem; background: rgba(255,255,255,0.1); padding: 0.3rem; border-radius: 8px;">
+          <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 0.75rem;" [style.background]="drawingMode === 'video' ? 'var(--primary)' : ''" (click)="drawingMode = 'video'">📹 Video</button>
+          <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 0.75rem;" [style.background]="drawingMode === 'home' ? '#10B981' : ''" (click)="drawingMode = 'home'">⌂ Home</button>
+          <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 0.75rem;" [style.background]="drawingMode === 'nav' ? '#F59E0B' : ''" (click)="drawingMode = 'nav'">🔗 Slide</button>
+          <button class="btn btn-secondary" style="padding: 2px 8px; font-size: 0.75rem;" [style.background]="drawingMode === 'menu' ? '#8B5CF6' : ''" (click)="drawingMode = 'menu'">☰ Menu</button>
+        </div>
+      </div>
+      <button class="btn btn-secondary" style="background: white; color: black;" (click)="closeModal()">Done & Close</button>
+    </div>
+
+    <div style="position: relative; width: 90vw; height: 70vh; background: #e5e7eb; border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);">
+      <div class="thumbnail-canvas-container" style="position: relative; max-width: 100%; max-height: 100%; cursor: crosshair; user-select: none;"
+           (mousedown)="onMouseDown($event, activeModalPage)" 
+           (mousemove)="onMouseMove($event, activeModalPage)" 
+           (mouseup)="onMouseUp(activeModalPage)" 
+           (mouseleave)="onMouseUp(activeModalPage)">
+        
+        <img [src]="API_BASE + '/storage/' + projectId + '/images/' + activeModalPage.image_name" style="display: block; max-width: 100%; max-height: 100%; object-fit: contain; pointer-events: none;" />
+
+        <!-- Preview Video Box -->
+        <div *ngIf="activeModalPage.video_name" 
+             style="position: absolute; border: 3px dashed rgba(79, 70, 229, 0.9); background: rgba(79, 70, 229, 0.2); pointer-events: none; z-index: 10;"
+             [style.top.%]="activeModalPage.video_top" 
+             [style.left.%]="activeModalPage.video_left" 
+             [style.width.%]="activeModalPage.video_width" 
+             [style.height.%]="activeModalPage.video_height">
+        </div>
+
+        <!-- Render Hotspots -->
+        <div *ngFor="let h of activeModalPage.hotspots" 
+             style="position: absolute; border: 3px solid; pointer-events: none; z-index: 11; display: flex; align-items: flex-start; justify-content: flex-end;"
+             [style.border-color]="h.type === 'home' ? '#10B981' : h.type === 'nav' ? '#F59E0B' : '#8B5CF6'"
+             [style.background]="h.type === 'home' ? 'rgba(16, 185, 129, 0.2)' : h.type === 'nav' ? 'rgba(245, 158, 11, 0.2)' : 'rgba(139, 92, 246, 0.2)'"
+             [style.top.%]="h.top" 
+             [style.left.%]="h.left" 
+             [style.width.%]="h.width" 
+             [style.height.%]="h.height">
+        </div>
       </div>
     </div>
-    <div style="display: flex; gap: 1rem;">
-      <button class="btn" style="background: #EF4444; font-size: 0.8rem; padding: 0.5rem 1rem;" (click)="activeModalPage.hotspots = []; activeModalPage.video_width = 0; activeModalPage.video_height = 0;">Clear All on this Page</button>
-      <button class="btn" style="background: #10B981; padding: 0.5rem 1.5rem;" (click)="closeModal()">Save & Close</button>
-    </div>
-  </div>
-  
-  <div style="width: 90vw; color: #ddd; font-size: 0.8rem; margin-bottom: 0.5rem;">
-    * <strong>Active on this page:</strong> 
-    <span *ngIf="activeModalPage.video_width" style="margin-right: 0.5rem; color: #f87171;">● Video Box</span>
-    <span *ngFor="let h of activeModalPage.hotspots" style="margin-right: 0.5rem;" [style.color]="h.type === 'home' ? '#10B981' : h.type === 'nav' ? '#f59e0b' : '#8B5CF6'">
-      ● {{ h.type === 'home' ? 'Home' : h.type === 'nav' ? 'Slide' : 'Menu' }}
-      <span (click)="deleteHotspot(activeModalPage, h)" style="cursor: pointer; text-decoration: underline; font-size: 0.7rem; margin-left: 2px;">(x)</span>
-    </span>
-  </div>
-  
-  <div style="position: relative; display: inline-block; max-width: 90vw; max-height: 80vh; background: #fff; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); border-radius: 8px; overflow: hidden; user-select: none; cursor: crosshair;"
-       (mousedown)="onMouseDown($event, activeModalPage)" 
-       (mousemove)="onMouseMove($event, activeModalPage)" 
-       (mouseup)="onMouseUp(activeModalPage)" 
-       (mouseleave)="onMouseUp(activeModalPage)">
-       
-    <img *ngIf="activeModalPage.image_name" [src]="API_BASE + '/storage/' + projectId + '/images/' + activeModalPage.image_name" style="max-height: 80vh; max-width: 90vw; display: block; pointer-events: none;" alt="Maximized Slide" onerror="this.style.display='none'"/>
     
-    <!-- Red layout box perfectly tracked to mouse math -->
-    <div *ngIf="activeModalPage.video_name" 
-         style="position: absolute; border: 3px solid rgba(239, 68, 68, 0.9); background: rgba(239, 68, 68, 0.2); pointer-events: none; z-index: 10;"
-         [style.top.%]="activeModalPage.video_top" 
-         [style.left.%]="activeModalPage.video_left" 
-         [style.width.%]="activeModalPage.video_width" 
-         [style.height.%]="activeModalPage.video_height">
-    </div>
-
-    <!-- Modal Hotspots -->
-    <div *ngFor="let h of activeModalPage.hotspots" 
-         style="position: absolute; pointer-events: none; z-index: 11; border-radius: 4px;"
-         [style.border]="'3px solid ' + (h.type === 'home' ? '#10B981' : h.type === 'nav' ? '#F59E0B' : '#8B5CF6')"
-         [style.background]="(h.type === 'home' ? 'rgba(16, 185, 129, 0.2)' : h.type === 'nav' ? 'rgba(245, 158, 11, 0.2)' : 'rgba(139, 92, 246, 0.2)')"
-         [style.top.%]="h.top" 
-         [style.left.%]="h.left" 
-         [style.width.%]="h.width" 
-         [style.height.%]="h.height">
+    <div style="color: #e5e7eb; margin-top: 1.5rem; font-size: 0.9rem;">
+      Click and drag to precisely trace your hotspots. Layout is automatically saved.
     </div>
   </div>
-  
-  <div style="color: #e5e7eb; margin-top: 1.5rem; font-size: 0.9rem;">
-    Click and drag to precisely trace your video footprint across the canvas. Both inputs effortlessly replicate mathematical coordinates.
-  </div>
-</div>
