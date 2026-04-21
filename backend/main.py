@@ -310,6 +310,8 @@ def get_base_html(image_filename, prev_filename="", next_filename="", video_file
             <div id="aspect-ratio-container">
                 <div id="slideCover">
                     <img src="./images/[[IMAGE]]" data-next-file="[[NEXT]]" data-previous-file="[[PREV]]"/>
+                    <a href="[[PREV]]" class="nav-zone nav-zone-left"></a>
+                    <a href="[[NEXT]]" class="nav-zone nav-zone-right"></a>
                     [[VIDEO_EMBED]]
                     [[HOTSPOT_HTML]]
                 </div>
@@ -328,8 +330,8 @@ def get_base_html(image_filename, prev_filename="", next_filename="", video_file
     html = html.replace("[[TRACKING_SCRIPT]]", SFE_TRACKING)
     html = html.replace("[[CONTROL]]", SFE_CONTROL)
     html = html.replace("[[IMAGE]]", image_filename)
-    html = html.replace("[[NEXT]]", next_filename if next_filename else "")
-    html = html.replace("[[PREV]]", prev_filename if prev_filename else "")
+    html = html.replace("[[NEXT]]", next_filename if next_filename else "javascript:void(0)")
+    html = html.replace("[[PREV]]", prev_filename if prev_filename else "javascript:void(0)")
     html = html.replace("[[VIDEO_EMBED]]", video_embed)
     html = html.replace("[[HOTSPOT_HTML]]", hotspot_html)
     html = html.replace("[[MENU_OVERLAYS]]", menu_overlays)

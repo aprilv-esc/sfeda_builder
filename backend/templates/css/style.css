@@ -51,9 +51,21 @@ body,html{
 /* SFE COMPLIANCE: Hotspots MUST be on top of image and display: block */
 #slideCover a {
     display: block !important;
-    z-index: 100 !important;
+    z-index: 1000 !important;
     text-decoration: none;
 }
+
+/* Invisible Tap Zones for Navigation */
+.nav-zone {
+    position: absolute;
+    top: 0;
+    width: 10%;
+    height: 100%;
+    z-index: 500; /* Between image (5) and custom hotspots (1000) */
+    text-decoration: none;
+}
+.nav-zone-left { left: 0; }
+.nav-zone-right { right: 0; }
 
 /* SFE RULE 5: Reserve space for Maximize button in top right */
 .sfe-safe-zone {
