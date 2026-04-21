@@ -290,12 +290,14 @@ def get_base_html(image_filename, prev_filename="", next_filename="", video_file
             #aspect-ratio-container {
                 aspect-ratio: [[RATIO]];
                 width: 100%;
-                /* Breathing Room: Use 96vh instead of 100vh to avoid edge clipping */
-                max-width: calc(96vh * [[RATIO]]);
-                max-height: 96vh;
+                /* Total Visibility: 94vh + 5px padding ensures no edge clipping EVER */
+                max-width: calc(94vh * [[RATIO]]);
+                max-height: 94vh;
                 margin: auto;
                 position: relative;
-                overflow: visible; 
+                overflow: visible;
+                padding: 5px; /* Safety buffer inside the container */
+                background: #000;
             }
         </style>
         <script type="text/javascript">
