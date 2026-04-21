@@ -94,40 +94,55 @@ body,html{
 
 .popup-menu-content {
     background: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    min-width: 300px;
-    max-width: 80%;
-    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    padding: 10px;
+    border-radius: 12px;
+    width: 320px;
+    max-width: 90%;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+    border: 1px solid #ddd;
 }
 
 .popup-menu-content ul {
     list-style: none;
     padding: 0;
-    margin: 0 0 20px 0;
+    margin: 0;
 }
 
 .popup-menu-content li {
-    margin-bottom: 15px;
+    margin: 0;
 }
 
 .popup-menu-content a {
-    color: #333;
+    color: #cc0000; /* Professional SFE Red */
     text-decoration: none;
-    font-size: 18px;
+    font-size: 20px;
+    font-weight: bold;
     display: block;
-    padding: 10px;
+    padding: 18px 15px;
     border-bottom: 1px solid #eee;
+    transition: background 0.2s;
+}
+
+.popup-menu-content a:hover {
+    background: #f9f9f9;
+}
+
+.popup-menu-content li:last-child a {
+    border-bottom: none;
 }
 
 .close-menu {
     width: 100%;
-    padding: 10px;
-    background: #f44336;
+    padding: 15px;
+    margin-top: 5px;
+    background: #333;
     color: white;
     border: none;
-    border-radius: 5px;
+    border-radius: 0 0 10px 10px;
     cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    text-transform: uppercase;
 }
 
 /* HIDE RULES FOR LEGACY BUTTONS */

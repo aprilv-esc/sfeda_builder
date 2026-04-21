@@ -590,14 +590,19 @@ async def generate_project(project_id: str, body: Dict[str, Any]):
                         if not target.endswith('.html') and target and target != '#':
                             h_copy['target'] = f"{target}.html"
                     
-                    # Handle Menu Items
-                    if 'menuItems' in h_copy:
-                        for item in h_copy['menuItems']:
-                            i_target = item.get('target', '')
+                    # Handle Menu Items - Defensive check for multiple naming conventions
+                    menu_items = h_copy.get('menuItems', h_copy.get('items', []))
+                    if menu_items:
+                        h_copy['menuItems'] = [] # Normalize
+                        for item in menu_items:
+                            i_copy = item.copy()
+                            i_target = i_copy.get('target', '')
                             if i_target == first_slide_id:
-                                item['target'] = "index.html"
+                                i_copy['target'] = "index.html"
                             elif i_target in rename_map:
-                                item['target'] = rename_map[i_target]
+                                i_copy['target'] = rename_map[i_target]
+                            h_copy['menuItems'].append(i_copy)
+                    
                     processed_hotspots.append(h_copy)
                 
                 print(f"DEBUG: Generating {new_html_name} with {len(processed_hotspots)} hotspots")
