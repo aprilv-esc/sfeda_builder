@@ -145,10 +145,36 @@ body,html{
     text-transform: uppercase;
 }
 
-/* HIDE RULES FOR LEGACY BUTTONS */
+/* HIDE RULES FOR LEGACY BUTTONS - Keep these to clean up old templates */
 .nav-btn, .home-btn, .nav-prev, .nav-next, .arrow, .btn-nav {
     display: none !important;
     visibility: hidden !important;
     pointer-events: none !important;
     opacity: 0 !important;
+}
+
+/* GLOBAL HERO BUTTONS - New high-priority classes */
+.global-home-btn {
+    display: block !important;
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    background-color: rgba(255,255,255,0.9);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23333'%3E%3Cpath d='M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 30px;
+    border-radius: 50%;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    z-index: 9999 !important;
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.2s;
+    pointer-events: auto !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.global-home-btn:active {
+    transform: scale(0.9);
+    background-color: #fff;
 }

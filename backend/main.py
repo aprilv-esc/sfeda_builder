@@ -241,7 +241,7 @@ def create_dummy_slide(title: str, text: str, dest_path: str):
         
     img.save(dest_path)
 
-def get_base_html(image_filename, prev_filename="", next_filename="", video_filename="", v_top=10, v_left=10, v_width=80, v_height=80, hotspots=None, home_position='none', aspect_ratio=1.333):
+def get_base_html(image_filename, prev_filename="", next_filename="", video_filename="", v_top=10, v_left=10, v_width=80, v_height=80, hotspots=None, home_position='none', home_v="", aspect_ratio=1.333):
     video_embed = ""
     if video_filename:
         # Put id directly on video for control.js play() call
@@ -251,6 +251,11 @@ def get_base_html(image_filename, prev_filename="", next_filename="", video_file
     
     hotspot_html = ""
     menu_overlays = ""
+    home_btn_html = ""
+    
+    if home_position != 'none':
+        home_btn_html = f'<a href="index.html" class="global-home-btn" style="{home_v}"></a>'
+
     if hotspots:
         for idx, h in enumerate(hotspots):
             h_top, h_left, h_width, h_height = h.get('top', 0), h.get('left', 0), h.get('width', 0), h.get('height', 0)
@@ -268,10 +273,10 @@ def get_base_html(image_filename, prev_filename="", next_filename="", video_file
                 menu_id = f"custom-menu-{idx}"
                 hotspot_html += f'<a href="javascript:void(0)" onclick="toggleMenu(\'{menu_id}\')" style="{common_style}"></a>'
                 items_html = ""
-                for item in h.get('menuItems', []):
                     target = item.get("target", "#")
                     if not target.endswith('.html') and target != '#': target = f"{target}.html"
-                    items_html += f'<li><a href="{target}">{item.get("label", "Link")}</a></li>'
+                    # SFE COMPLIANCE: Use window.open and stopPropagation to ensure navigation wins over overlay
+                    items_html += f'<li><a href="javascript:void(0)" onclick="window.open(\'{target}\', \'_self\'); event.stopPropagation();">{item.get("label", "Link")}</a></li>'
                 menu_overlays += f"""
                 <div id="{menu_id}" class="popup-menu-overlay" onclick="toggleMenu('{menu_id}')">
                     <div class="popup-menu-content" onclick="event.stopPropagation()">
@@ -316,6 +321,7 @@ def get_base_html(image_filename, prev_filename="", next_filename="", video_file
                     <a href="[[NEXT]]" class="nav-zone nav-zone-right"></a>
                     [[VIDEO_EMBED]]
                     [[HOTSPOT_HTML]]
+                    [[HOME_BTN_HTML]]
                 </div>
                 <div class="sfe-safe-zone"></div>
             </div>
@@ -336,6 +342,7 @@ def get_base_html(image_filename, prev_filename="", next_filename="", video_file
     html = html.replace("[[PREV]]", prev_filename if prev_filename else "javascript:void(0)")
     html = html.replace("[[VIDEO_EMBED]]", video_embed)
     html = html.replace("[[HOTSPOT_HTML]]", hotspot_html)
+    html = html.replace("[[HOME_BTN_HTML]]", home_btn_html)
     html = html.replace("[[MENU_OVERLAYS]]", menu_overlays)
     html = html.replace("[[RATIO]]", str(aspect_ratio))
     
@@ -630,6 +637,7 @@ async def generate_project(project_id: str, body: Dict[str, Any]):
                                             v_top=v_top, v_left=v_left, v_width=v_width, v_height=v_height, 
                                             hotspots=processed_hotspots, 
                                             home_position=home_position,
+                                            home_v=home_v,
                                             aspect_ratio=aspect_ratio)
                 
                 with open(build_dir / new_html_name, "w") as f:
