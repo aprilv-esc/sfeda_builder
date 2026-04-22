@@ -65,16 +65,29 @@
       <p style="color: var(--text-muted); margin-bottom: 2rem; margin-top: 0.5rem;">
         Rule #6: Individual HTML pages must be named descriptively based on contents.
       </p>
-      <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; background: #eee; padding: 0.5rem; border-radius: 8px; width: fit-content;">
-        <span style="font-size: 0.85rem; font-weight: bold; margin-right: 0.5rem; display: flex; align-items: center;">DRAW MODE:</span>
-        <button class="btn btn-secondary" [style.background]="drawingMode === 'video' ? 'var(--primary)' : ''" [style.color]="drawingMode === 'video' ? 'white' : ''" (click)="drawingMode = 'video'">📹 Video</button>
-        <button class="btn btn-secondary" [style.background]="drawingMode === 'home' ? '#10B981' : ''" [style.color]="drawingMode === 'home' ? 'white' : ''" (click)="drawingMode = 'home'">⌂ Home Link</button>
-        <button class="btn btn-secondary" [style.background]="drawingMode === 'nav' ? '#F59E0B' : ''" [style.color]="drawingMode === 'nav' ? 'white' : ''" (click)="drawingMode = 'nav'">🔗 Slide Link</button>
-        <button class="btn btn-secondary" [style.background]="drawingMode === 'menu' ? '#8B5CF6' : ''" [style.color]="drawingMode === 'menu' ? 'white' : ''" (click)="drawingMode = 'menu'">☰ Menu Popup</button>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; background: #eee; padding: 0.5rem; border-radius: 8px;">
+        <div style="display: flex; gap: 0.5rem;">
+          <span style="font-size: 0.85rem; font-weight: bold; margin-right: 0.5rem; display: flex; align-items: center;">DRAW MODE:</span>
+          <button class="btn btn-secondary" [style.background]="drawingMode === 'video' ? 'var(--primary)' : ''" [style.color]="drawingMode === 'video' ? 'white' : ''" (click)="drawingMode = 'video'">📹 Video</button>
+          <button class="btn btn-secondary" [style.background]="drawingMode === 'home' ? '#10B981' : ''" [style.color]="drawingMode === 'home' ? 'white' : ''" (click)="drawingMode = 'home'">⌂ Home Link</button>
+          <button class="btn btn-secondary" [style.background]="drawingMode === 'nav' ? '#F59E0B' : ''" [style.color]="drawingMode === 'nav' ? 'white' : ''" (click)="drawingMode = 'nav'">🔗 Slide Link</button>
+          <button class="btn btn-secondary" [style.background]="drawingMode === 'menu' ? '#8B5CF6' : ''" [style.color]="drawingMode === 'menu' ? 'white' : ''" (click)="drawingMode = 'menu'">☰ Menu Popup</button>
+        </div>
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+          <span style="font-size: 0.85rem; font-weight: bold; color: var(--secondary);">SELECTION:</span>
+          <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.75rem;" (click)="toggleAll(true)">Select All (2+)</button>
+          <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.75rem;" (click)="toggleAll(false)">Deselect All</button>
+        </div>
       </div>
       <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem;">
-        <div *ngFor="let page of pages; let i = index" style="border: 1px solid var(--border); border-radius: 8px; padding: 1rem; background: var(--bg);">
-          <div style="font-weight: 600; margin-bottom: 0.5rem; color: var(--text-muted);">Slide {{ i + 1 }}</div>
+        <div *ngFor="let page of pages; let i = index" style="border: 2px solid var(--border); border-radius: 8px; padding: 1rem; background: var(--bg); transition: all 0.2s;" [style.border-color]="page.selected ? 'var(--primary)' : 'var(--border)'" [style.opacity]="page.selected ? '1' : '0.6'">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <div style="font-weight: 600; color: var(--text-muted); display: flex; align-items: center; gap: 0.5rem;">
+              Slide {{ i + 1 }}
+              <span *ngIf="i === 0" style="font-size: 0.65rem; background: var(--secondary); color: white; padding: 2px 6px; border-radius: 99px;">LOCKED</span>
+            </div>
+            <input type="checkbox" [(ngModel)]="page.selected" [disabled]="i === 0" style="width: 20px; height: 20px; cursor: pointer;">
+          </div>
           
           <div class="card-image thumbnail-canvas-container" style="width: 100%; aspect-ratio: 4/3; background: #E5E7EB; border-radius: 6px; margin-bottom: 1rem; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative; user-select: none; cursor: crosshair;"
                (mousedown)="onMouseDown($event, page)" 
@@ -225,8 +238,8 @@
       </div>
 
       <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
-        <button class="btn" style="font-size: 1.125rem; padding: 1rem 2rem; box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.4);" (click)="generateZip()" [disabled]="isGenerating">
-          {{ isGenerating ? 'Packaging Detailing Aid...' : (downloadUrl ? 'Update & Re-Generate' : 'Generate Detailing Aid') }}
+        <button class="btn" style="font-size: 1.125rem; padding: 1rem 2rem; box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.4);" (click)="generateZip()" [disabled]="isGenerating || selectedCount === 0">
+          {{ isGenerating ? 'Packaging Detailing Aid...' : (downloadUrl ? 'Update & Re-Generate' : 'Generate ' + selectedCount + ' Slides') }}
         </button>
       </div>
       

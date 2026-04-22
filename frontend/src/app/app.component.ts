@@ -66,7 +66,12 @@ export class AppComponent implements OnInit {
             if (!p.hotspots) p.hotspots = [];
           });
         }
-        this.pages = project.pages;
+        this.pages = project.pages.map((p: any, index: number) => ({
+          ...p,
+          selected: (p.selected !== undefined) ? p.selected : true
+        }));
+        if (this.pages.length > 0) this.pages[0].selected = true; // Ensure index is locked
+        
         this.navArrowsPosition = project.nav_arrows_position || 'none';
         this.homePosition = project.home_position || 'none';
         this.downloadUrl = null;
@@ -180,7 +185,8 @@ export class AppComponent implements OnInit {
         this.pages = res.pages.map((p: any, index: number) => ({
           ...p,
           new_html_name: index === 0 ? 'index.html' : p.html_name,
-          hotspots: p.hotspots || []
+          hotspots: p.hotspots || [],
+          selected: true // Default all selected
         }));
         this.isUploading = false;
         
@@ -199,8 +205,9 @@ export class AppComponent implements OnInit {
     
     this.isGenerating = true;
 
+    const selectedPages = this.pages.filter(p => p.selected);
     const payload = {
-      pages: this.pages,
+      pages: selectedPages,
       nav_arrows_position: this.navArrowsPosition,
       home_position: this.homePosition
     };
@@ -439,5 +446,16 @@ export class AppComponent implements OnInit {
     this.activeModalPage = null;
     // Remount background scrolling
     document.body.style.overflow = '';
+  }
+
+  get selectedCount(): number {
+    return this.pages.filter(p => p.selected).length;
+  }
+
+  toggleAll(selected: boolean) {
+    this.pages.forEach((p, index) => {
+      if (index === 0) return; // Keep index locked
+      p.selected = selected;
+    });
   }
 }

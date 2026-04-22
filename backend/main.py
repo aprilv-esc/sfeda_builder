@@ -538,28 +538,35 @@ async def generate_project(project_id: str, body: Dict[str, Any]):
             rename_map = {p['id']: p.get('new_html_name', p.get('html_name')) for p in new_pages}
             frontend_state_map = {p['id']: p for p in new_pages}
             
-            for i, page in enumerate(project['pages']):
-                new_html_name = rename_map.get(page['id'], page['html_name'])
+            # CONTEXT: Selective build logic. 
+            # We iterate over new_pages (the selection) instead of all project pages.
+            for i, page_config in enumerate(new_pages):
+                page_id = page_config['id']
+                # find the original page data
+                page = next((p for p in project['pages'] if p['id'] == page_id), None)
+                if not page: continue
+
+                new_html_name = rename_map.get(page_id, page.get('html_name'))
                 image_name = page['image_name']
                 
-                # Use real image if it exists
+                # Copy assets only for selected slides
                 src_image = project_dir / "images" / image_name
                 if src_image.exists():
                     shutil.copy(src_image, images_build_dir / image_name)
                 
-                # NEW: More robust next/prev naming
-                prev_html_name = ""
+                # Dynamic next/prev naming within the selection subset
+                prev_html_name = "javascript:void(0)"
                 if i > 0:
-                    prev_id = project['pages'][i-1]['id']
-                    prev_html_name = rename_map.get(prev_id, project['pages'][i-1].get('html_name', ''))
+                    prev_id = new_pages[i-1]['id']
+                    prev_html_name = rename_map.get(prev_id, "")
                     
-                next_html_name = ""
-                if i < len(project['pages']) - 1:
-                    next_id = project['pages'][i+1]['id']
-                    next_html_name = rename_map.get(next_id, project['pages'][i+1].get('html_name', ''))
+                next_html_name = "javascript:void(0)"
+                if i < len(new_pages) - 1:
+                    next_id = new_pages[i+1]['id']
+                    next_html_name = rename_map.get(next_id, "")
                     
-                # Grab dimensions and interaction hotspots from the frontend state payload
-                frontend_page = frontend_state_map.get(page['id'], {})
+                # Grab interaction hotspots from the payload config
+                frontend_page = page_config
                 v_top = frontend_page.get('video_top', 10)
                 v_left = frontend_page.get('video_left', 10)
                 v_width = frontend_page.get('video_width', 80)
