@@ -273,6 +273,7 @@ def get_base_html(image_filename, prev_filename="", next_filename="", video_file
                 menu_id = f"custom-menu-{idx}"
                 hotspot_html += f'<a href="javascript:void(0)" onclick="toggleMenu(\'{menu_id}\')" style="{common_style}"></a>'
                 items_html = ""
+                for item in h.get('menuItems', []):
                     target = item.get("target", "#")
                     if not target.endswith('.html') and target != '#': target = f"{target}.html"
                     # SFE COMPLIANCE: Use window.open and stopPropagation to ensure navigation wins over overlay
