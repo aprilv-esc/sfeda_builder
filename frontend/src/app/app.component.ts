@@ -107,18 +107,18 @@ export class AppComponent implements OnInit {
       showProgress: true,
       steps: [
         {
-          title: 'Welcome!',
-          intro: 'Welcome to the Detailing Aid Converter! This tool helps you convert PDF or HTML slides into SFE-compatible Detailing Aids.'
+          title: 'Welcome to the PRO Builder!',
+          intro: 'Welcome to the upgraded Detailing Aid Converter! You now have access to <b>Selective Slide Generation</b>, <b>Visual Navigation Positioning</b>, and <b>High-Precision Interaction Drawing</b>.'
         },
         {
           element: document.querySelector('#step1-upload'),
           title: 'Step 1: Upload Source',
-          intro: 'Select your source PDF or HTML ZIP file. We will automatically parse the slides and suggest filenames.'
+          intro: 'Start by uploading your PDF or ZIP. <br><br><b>PRO Tip:</b> Once uploaded, you can pick exactly which slides to focus on for lightning-fast testing!'
         },
         {
           element: document.querySelector('#tour-help'),
-          title: 'Need Help?',
-          intro: 'You can restart this tour anytime by clicking this button.'
+          title: 'Your Command Center',
+          intro: 'The tour will automatically update with advanced tips (Menus, Home Links, Video Drawing) once your slides are loaded! Restart it here anytime.'
         }
       ]
     }).start();
