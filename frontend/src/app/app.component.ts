@@ -131,33 +131,33 @@ export class AppComponent implements OnInit {
       steps: [
         {
           element: document.querySelector('#step2-rename'),
-          title: 'Step 2: Rename & Multimedia',
-          intro: 'Manage your slides here. You can rename the HTML files to be more descriptive (e.g., "ProductBenefits.html") instead of "slide_1.html".'
+          title: 'Step 2: Rename & Select',
+          intro: 'Manage your slides here. You can rename files (e.g. "ProductBenefits.html") and <b>Select/Deselect</b> specific slides to build only what you need. <br><br><i>Note: Slide 1 is locked as your mandatory "index.html" landing page.</i>'
         },
         {
           element: document.querySelector('.media-upload-area'),
           title: 'Attach Media',
-          intro: 'Want to embed a video? Upload it here for a specific slide!'
-        },
-        {
-          element: document.querySelector('.thumbnail-canvas-container'),
-          title: 'Interactive Bounding Box',
-          intro: 'Once a video is attached, click and drag directly on the thumbnail to define exactly where the video should play!'
+          intro: 'Upload an mp4 or webm video for a specific slide here!'
         },
         {
           element: document.querySelector('.maximize-btn'),
-          title: 'High-Precision Editing',
-          intro: 'For pixel-perfect accuracy, use the Maximize tool to draw your bounding box on a fullscreen view of the slide.'
+          title: 'Precision Editor',
+          intro: 'Use the <b>Maximize</b> tool to draw pixel-perfect interaction boxes on a full-screen view of the slide.'
+        },
+        {
+          element: document.querySelector('#tour-modes'),
+          title: 'New Interaction Modes',
+          intro: 'Choose your weapon! You can now draw regions for <b>Videos</b>, <b>Home Links</b>, <b>Slide Links</b>, or even custom <b>Popup Menus</b> for a professional tablet experience.'
         },
         {
           element: document.querySelector('#global-settings'),
-          title: 'Global Navigation Setup',
-          intro: 'Choose where the Home and Navigation button arrows should appear across all slides (Top, Middle, or Bottom).'
+          title: 'Veeva-Ready Navigation',
+          intro: 'Choose where visual arrows and the global Home button should appear. We automatically re-wire navigation to skip any unselected slides!'
         },
         {
           element: document.querySelector('#step3-generate'),
-          title: 'Step 3: Generate & Preview',
-          intro: 'Click Generate to build your project. You can then Preview the output in the browser to verify the video placement before downloading the final ZIP.'
+          title: 'Step 3: Generate & Test',
+          intro: 'Building only 5 slides? The generator will tell you! Click to build, then use <b>Preview</b> to test your flow before downloading the final ZIP.'
         }
       ]
     }).start();

@@ -266,7 +266,7 @@
   <div style="width: 100%; max-width: 95vw; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
     <div style="display: flex; align-items: center; gap: 2rem;">
       <span style="font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em;">PRECISION EDITOR</span>
-      <div style="display: flex; gap: 0.5rem; background: rgba(0,0,0,0.3); padding: 0.4rem; border-radius: 10px;">
+      <div id="tour-modes" style="display: flex; gap: 0.5rem; background: rgba(0,0,0,0.3); padding: 0.4rem; border-radius: 10px;">
         <button class="btn btn-secondary" style="padding: 4px 12px; font-size: 0.85rem;" [style.background]="drawingMode === 'video' ? 'var(--primary)' : ''" (click)="drawingMode = 'video'">📹 Video</button>
         <button class="btn btn-secondary" style="padding: 4px 12px; font-size: 0.85rem;" [style.background]="drawingMode === 'home' ? '#10B981' : ''" (click)="drawingMode = 'home'">⌂ Home</button>
         <button class="btn btn-secondary" style="padding: 4px 12px; font-size: 0.85rem;" [style.background]="drawingMode === 'nav' ? '#F59E0B' : ''" (click)="drawingMode = 'nav'">🔗 Slide</button>
