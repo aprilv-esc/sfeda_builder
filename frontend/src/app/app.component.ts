@@ -75,10 +75,11 @@ export class AppComponent implements OnInit {
         this.navArrowsPosition = project.nav_arrows_position || 'none';
         this.homePosition = project.home_position || 'none';
         this.downloadUrl = null;
-        // Scroll to management view
+        // Scroll to management view and auto-trigger workbench tour
         setTimeout(() => {
           document.querySelector('#step2-rename')?.scrollIntoView({ behavior: 'smooth' });
-        }, 100);
+          this.tourPages();
+        }, 500);
       },
       error: (err) => alert('Failed to load project details.')
     });
@@ -190,8 +191,10 @@ export class AppComponent implements OnInit {
         }));
         this.isUploading = false;
         
-        // Let the user interact immediately. We won't auto-start tour 2 to prevent blocking their clicks.
-        // If they need help they can click the tour button.
+        // Auto-trigger workbench tour for the new upload
+        setTimeout(() => {
+          this.tourPages();
+        }, 800);
       },
       error: (err) => {
         this.uploadError = 'Upload failed. ' + (err.error?.detail || err.message);

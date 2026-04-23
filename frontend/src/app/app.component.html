@@ -4,7 +4,7 @@
     <div>
       <button class="btn btn-secondary" style="margin-right: 1rem;" (click)="projectId = null; resetApp(); loadRecentProjects()">← Back to Projects</button>
       <button *ngIf="projectId" class="btn btn-secondary" style="margin-right: 1rem;" (click)="resetApp()">Clear Slide Data</button>
-      <button id="tour-help" class="btn btn-secondary" (click)="startTour()">Help & Tour</button>
+      <button id="tour-help" class="btn btn-secondary" (click)="projectId ? tourPages() : startTour()">Help & Tour</button>
     </div>
   </div>
 
