@@ -241,7 +241,7 @@ def create_dummy_slide(title: str, text: str, dest_path: str):
         
     img.save(dest_path)
 
-def get_base_html(image_filename, prev_filename="", next_filename="", video_filename="", v_top=10, v_left=10, v_width=80, v_height=80, hotspots=None, home_position='none', home_v="", aspect_ratio=1.333):
+def get_base_html(image_filename, prev_filename="", next_filename="", video_filename="", v_top=10, v_left=10, v_width=80, v_height=80, hotspots=None, home_position='none', home_v="", arrow_v="", aspect_ratio=1.333):
     video_embed = ""
     if video_filename:
         # Put id directly on video for control.js play() call
@@ -255,6 +255,16 @@ def get_base_html(image_filename, prev_filename="", next_filename="", video_file
     
     if home_position != 'none':
         home_btn_html = f'<a href="index.html" class="global-home-btn" style="{home_v}"></a>'
+
+    # SFE COMPLIANCE: Inject visual arrows if position is not 'none'
+    arrow_html = ""
+    # We use the same 'none' check as the nav-zone opacity rule
+    # But here we are injecting the actual visual button elements
+    if arrow_v and "top: 0; height: 100%" not in arrow_v: # If not the purely invisible tap-zone config
+        if prev_filename and prev_filename != "javascript:void(0)":
+            arrow_html += f'<a href="{prev_filename}" class="global-nav-arrow global-nav-prev" style="{arrow_v}"></a>'
+        if next_filename and next_filename != "javascript:void(0)":
+            arrow_html += f'<a href="{next_filename}" class="global-nav-arrow global-nav-next" style="{arrow_v}"></a>'
 
     if hotspots:
         for idx, h in enumerate(hotspots):
@@ -276,8 +286,8 @@ def get_base_html(image_filename, prev_filename="", next_filename="", video_file
                 for item in h.get('menuItems', []):
                     target = item.get("target", "#")
                     if not target.endswith('.html') and target != '#': target = f"{target}.html"
-                    # SFE COMPLIANCE: Use window.open and stopPropagation to ensure navigation wins over overlay
-                    items_html += f'<li><a href="javascript:void(0)" onclick="window.open(\'{target}\', \'_self\'); event.stopPropagation();">{item.get("label", "Link")}</a></li>'
+                    # SFE COMPLIANCE: Use location.href redirection for absolute reliability in SFE webviews
+                    items_html += f'<li><a href="javascript:void(0)" onclick="location.href=\'{target}\'; event.stopPropagation();">{item.get("label", "Link")}</a></li>'
                 menu_overlays += f"""
                 <div id="{menu_id}" class="popup-menu-overlay" onclick="toggleMenu('{menu_id}')">
                     <div class="popup-menu-content" onclick="event.stopPropagation()">
@@ -323,6 +333,7 @@ def get_base_html(image_filename, prev_filename="", next_filename="", video_file
                     [[VIDEO_EMBED]]
                     [[HOTSPOT_HTML]]
                     [[HOME_BTN_HTML]]
+                    [[ARROW_HTML]]
                 </div>
                 <div class="sfe-safe-zone"></div>
             </div>
@@ -344,6 +355,7 @@ def get_base_html(image_filename, prev_filename="", next_filename="", video_file
     html = html.replace("[[VIDEO_EMBED]]", video_embed)
     html = html.replace("[[HOTSPOT_HTML]]", hotspot_html)
     html = html.replace("[[HOME_BTN_HTML]]", home_btn_html)
+    html = html.replace("[[ARROW_HTML]]", arrow_html)
     html = html.replace("[[MENU_OVERLAYS]]", menu_overlays)
     html = html.replace("[[RATIO]]", str(aspect_ratio))
     
@@ -639,6 +651,7 @@ async def generate_project(project_id: str, body: Dict[str, Any]):
                                             hotspots=processed_hotspots, 
                                             home_position=home_position,
                                             home_v=home_v,
+                                            arrow_v=arrow_v,
                                             aspect_ratio=aspect_ratio)
                 
                 with open(build_dir / new_html_name, "w") as f:

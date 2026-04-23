@@ -178,3 +178,38 @@ body,html{
     transform: scale(0.9);
     background-color: #fff;
 }
+
+/* GLOBAL NAVIGATION ARROWS */
+.global-nav-arrow {
+    display: block !important;
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    background-color: rgba(255,255,255,0.9);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 30px;
+    border-radius: 50%;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    z-index: 9999 !important;
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.2s;
+    pointer-events: auto !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+.global-nav-prev {
+    left: 2%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23333'%3E%3Cpath d='M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z'/%3E%3C/svg%3E");
+}
+
+.global-nav-next {
+    right: 2%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23333'%3E%3Cpath d='M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z'/%3E%3C/svg%3E");
+}
+
+.global-nav-arrow:active {
+    transform: scale(0.9);
+    background-color: #fff;
+}
