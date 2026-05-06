@@ -304,7 +304,8 @@ def get_base_html(image_filename, prev_filename="", next_filename="", video_file
                     target = item.get("target", "#")
                     if not target.endswith('.html') and target != '#': target = f"{target}.html"
                     # SFE COMPLIANCE: Use location.href redirection for absolute reliability in SFE webviews
-                    items_html += f'<li>{make_link(target, onclick_str=f"location.href=\\'{target}\\'; event.stopPropagation();", text=item.get("label", "Link"))}</li>'
+                    onclick_val = f"location.href='{target}'; event.stopPropagation();"
+                    items_html += f'<li>{make_link(target, onclick_str=onclick_val, text=item.get("label", "Link"))}</li>'
                 menu_overlays += f"""
                 <div id="{menu_id}" class="popup-menu-overlay" onclick="toggleMenu('{menu_id}')">
                     <div class="popup-menu-content" onclick="event.stopPropagation()">
