@@ -18,6 +18,15 @@ function slideHandlers(){
         tEnd=e.originalEvent.changedTouches[0].pageX
         swipeDirection();
     })
+    
+    // Polyfill for SFE+ preview: natively handle data-next-file clicks in browser
+    $("a[data-next-file]").on("click", function(e) {
+        e.preventDefault();
+        var target = $(this).attr("data-next-file");
+        if (target && target !== "javascript:void(0)") {
+            window.location.href = target;
+        }
+    });
 }
 
 function maintainAspectRatio(){
