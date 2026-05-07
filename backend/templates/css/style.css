@@ -54,6 +54,9 @@ body,html{
     z-index: 1000 !important;
     text-decoration: none;
 }
+a[data-next-file] {
+    cursor: pointer !important;
+}
 
 /* Invisible Tap Zones for Navigation */
 .nav-zone {

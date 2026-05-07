@@ -20,8 +20,9 @@ function slideHandlers(){
     })
     
     // Polyfill for SFE+ preview: natively handle data-next-file clicks in browser
-    $("a[data-next-file]").on("click", function(e) {
+    $(document).on("click touchend", "a[data-next-file]", function(e) {
         e.preventDefault();
+        e.stopPropagation();
         var target = $(this).attr("data-next-file");
         if (target && target !== "javascript:void(0)") {
             window.location.href = target;
