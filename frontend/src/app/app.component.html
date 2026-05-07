@@ -98,7 +98,7 @@
             <img *ngIf="page.image_name" [src]="API_BASE + '/storage/' + projectId + '/images/' + page.image_name" style="max-width: 100%; max-height: 100%; object-fit: contain; pointer-events: none;" alt="Slide preview" onerror="this.style.display='none'"/>
             <span *ngIf="!page.image_name" style="color: var(--text-muted); pointer-events: none;">No Preview / HTML Native</span>
             
-            <div *ngIf="page.video_name" 
+            <div *ngIf="page.video_name || page.video_width > 0" 
                  style="position: absolute; border: 2px solid rgba(239, 68, 68, 0.8); background: rgba(239, 68, 68, 0.2); pointer-events: none; z-index: 10; border-radius: 4px;"
                  [style.top.%]="page.video_top" 
                  [style.left.%]="page.video_left" 
@@ -306,7 +306,7 @@
            style="display: block; max-height: 75vh; max-width: 95vw; object-fit: contain; pointer-events: none;" />
 
       <!-- Video Box Overlay -->
-      <div *ngIf="activeModalPage.video_name" 
+      <div *ngIf="activeModalPage.video_name || activeModalPage.video_width > 0" 
            style="position: absolute; border: 3px dashed rgba(79, 70, 229, 0.9); background: rgba(79, 70, 229, 0.2); pointer-events: none; z-index: 10;"
            [style.top.%]="activeModalPage.video_top" 
            [style.left.%]="activeModalPage.video_left" 
